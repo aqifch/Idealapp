@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft, Camera, User, Mail, Phone, MapPin, Save } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 interface EditProfileViewProps {
   onBack: () => void;

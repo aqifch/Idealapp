@@ -62,7 +62,17 @@ export interface Banner {
   buttonLink?: string;
   isActive: boolean;
   displayOrder?: number;
-  // Styling options
+  // Display Style
+  displayStyle?: 'image-only' | 'image-text' | 'image-text-button';
+  // Animation
+  animationType?: 'fade' | 'slide' | 'zoom' | 'none';
+  // Button Style
+  buttonStyle?: 'solid' | 'outline' | 'gradient' | 'ghost' | 'rounded';
+  // Text Position
+  textPosition?: 'left' | 'center' | 'right';
+  // Overlay
+  overlayOpacity?: number; // 0-100
+  // Legacy Styling options (kept for backward compatibility)
   textColor?: string;
   overlayColor?: string; // e.g. "from-black/70 to-black/30"
   buttonColor?: string; // e.g. "linear-gradient(135deg, #FF9F40 0%, #FFB74D 100%)"
@@ -176,6 +186,11 @@ export const defaultBanners: Banner[] = [
     buttonText: "ORDER NOW",
     isActive: true,
     displayOrder: 1,
+    displayStyle: 'image-text-button',
+    animationType: 'fade',
+    buttonStyle: 'gradient',
+    textPosition: 'left',
+    overlayOpacity: 70,
   },
   {
     id: "hero-2",
@@ -187,6 +202,11 @@ export const defaultBanners: Banner[] = [
     buttonText: "ORDER NOW",
     isActive: true,
     displayOrder: 2,
+    displayStyle: 'image-text-button',
+    animationType: 'slide',
+    buttonStyle: 'gradient',
+    textPosition: 'left',
+    overlayOpacity: 70,
   },
   {
     id: "hero-3",
@@ -198,6 +218,11 @@ export const defaultBanners: Banner[] = [
     buttonText: "ORDER NOW",
     isActive: true,
     displayOrder: 3,
+    displayStyle: 'image-text-button',
+    animationType: 'zoom',
+    buttonStyle: 'gradient',
+    textPosition: 'left',
+    overlayOpacity: 70,
   },
   // Promo Banner
   {
@@ -209,6 +234,11 @@ export const defaultBanners: Banner[] = [
     buttonText: "Order Now",
     isActive: true,
     displayOrder: 1,
+    displayStyle: 'image-text-button',
+    animationType: 'fade',
+    buttonStyle: 'gradient',
+    textPosition: 'left',
+    overlayOpacity: 80,
   }
 ];
 

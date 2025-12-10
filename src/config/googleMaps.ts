@@ -1,55 +1,21 @@
 /**
  * Google Maps Configuration
  * 
- * This file provides a safe way to access Google Maps API key
- * across different build environments.
+ * Centralized Google Maps API configuration.
+ * Uses environment variables from .env file.
  */
 
-// Try multiple methods to get the API key
-function getGoogleMapsApiKey(): string {
-  // Method 1: Try import.meta.env (Vite)
-  try {
-    // @ts-ignore - import.meta.env may not exist in all environments
-    if (import.meta?.env?.VITE_GOOGLE_MAPS_API_KEY) {
-      // @ts-ignore
-      return import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
-    }
-  } catch (e) {
-    // Silently fail and try next method
-  }
+import { googleMapsConfig } from "./index";
 
-  // Method 2: Try process.env (Webpack/CRA)
-  try {
-    if (typeof process !== 'undefined' && process.env) {
-      return (process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.REACT_APP_GOOGLE_MAPS_API_KEY) as string || '';
-    }
-  } catch (e) {
-    // Silently fail and try next method
-  }
-
-  // Method 3: Try window object (manual configuration)
-  try {
-    if (typeof window !== 'undefined' && (window as any).GOOGLE_MAPS_API_KEY) {
-      return (window as any).GOOGLE_MAPS_API_KEY;
-    }
-  } catch (e) {
-    // Silently fail
-  }
-
-  // Method 4: Return empty string (manual entry mode)
-  return '';
-}
-
+/**
+ * Google Maps Configuration Object
+ * Re-exported from main config for backward compatibility
+ */
 export const GOOGLE_MAPS_CONFIG = {
-  apiKey: getGoogleMapsApiKey(),
-  isAvailable: () => getGoogleMapsApiKey().length > 0,
-  
-  // For manual configuration (optional)
-  setApiKey: (key: string) => {
-    if (typeof window !== 'undefined') {
-      (window as any).GOOGLE_MAPS_API_KEY = key;
-    }
-  }
+  apiKey: googleMapsConfig.apiKey,
+  isAvailable: () => googleMapsConfig.isAvailable(),
+  setApiKey: (key: string) => googleMapsConfig.setApiKey(key),
+  getScriptUrl: (libraries?: string[]) => googleMapsConfig.getScriptUrl(libraries),
 };
 
 // Log configuration status (only in development)

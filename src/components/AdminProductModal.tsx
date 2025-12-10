@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Save, Upload, Image as ImageIcon, CheckCircle } from 'lucide-react';
 import { Product, Category } from '../data/mockData';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface AdminProductModalProps {
   isOpen: boolean;

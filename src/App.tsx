@@ -1,48 +1,49 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Product, Category, Deal, Banner, categories as defaultCategories, defaultDeals, defaultBanners } from "./data/mockData";
 import { allProducts } from "./data/allProducts";
 import { CartProvider, useCart } from "./context/CartContext";
 import { NotificationProvider, useNotifications } from "./context/NotificationContext";
 import { ProductDetailModal } from "./components/ProductDetailModal";
-import { CartView } from "./components/CartView";
-import { CheckoutView } from "./components/CheckoutView";
-import { OrderSuccessView } from "./components/OrderSuccessView";
-import { AccountView } from "./components/AccountView";
-import { OrdersView } from "./components/OrdersView";
-import { ProductsView } from "./components/ProductsView";
 import { AddToCartToast } from "./components/AddToCartToast";
 import { EnhancedFlyingProduct } from "./components/EnhancedFlyingProduct";
-import { EditProfileView } from "./components/EditProfileView";
-import { SavedAddressesView } from "./components/SavedAddressesView";
-import { HomeProductCard } from "./components/HomeProductCard";
 import { AnimatePresence } from "motion/react";
 
 // New Components
 import { TopHeader } from "./components/TopHeader";
-import { SearchBar } from "./components/SearchBar";
-import { NewHeroBanner } from "./components/NewHeroBanner";
-import { NewCategories } from "./components/NewCategories";
-import { NewProductCard } from "./components/NewProductCard";
 import { NewBottomNav } from "./components/NewBottomNav";
-import { WishlistView } from "./components/WishlistView";
 import { MenuSidebar } from "./components/MenuSidebar";
 import { OrdersSidebar } from "./components/OrdersSidebar";
-import { DesktopSidebar } from "./components/DesktopSidebar";
 
 // Desktop Professional Components
 import { DesktopNavBar } from "./components/DesktopNavBar";
-import { DesktopFeaturedDeals } from "./components/DesktopFeaturedDeals";
-import { DesktopCategoryShowcase } from "./components/DesktopCategoryShowcase";
-import { DesktopPromoBanner } from "./components/DesktopPromoBanner";
-import { DesktopDealsSection } from "./components/DesktopDealsSection";
-import { AdminPanel } from "./components/AdminPanel";
-import { FlashSaleCard } from "./components/FlashSaleCard";
-import { LoginView } from "./components/LoginView";
-import { RegisterView } from "./components/RegisterView";
+
+// Routes
+import { AppRoutes } from "./routes";
+
 import { User } from "@supabase/supabase-js";
-import { supabase } from "./utils/supabase/client";
+import { supabase } from "./config/supabase";
+import { toast } from "sonner";
+import {
+  fetchProductsFromSupabase,
+  saveProductToSupabase,
+  deleteProductFromSupabase,
+  fetchCategoriesFromSupabase,
+  saveCategoryToSupabase,
+  deleteCategoryFromSupabase,
+  fetchDealsFromSupabase,
+  saveDealToSupabase,
+  deleteDealFromSupabase,
+  fetchBannersFromSupabase,
+  saveBannerToSupabase,
+  deleteBannerFromSupabase,
+} from "./utils/supabaseDataSync";
+import { fetchOrders, updateOrder as updateOrderInDb, Order } from "./utils/orders";
 
 function AppContent() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   // Auth State
   const [user, setUser] = useState<User | null>(null);
 
@@ -86,6 +87,105 @@ function AppContent() {
     return savedBanners ? JSON.parse(savedBanners) : defaultBanners;
   });
 
+  // Fetch data from Supabase on mount and sync localStorage to Supabase
+  useEffect(() => {
+    const loadDataFromSupabase = async () => {
+      try {
+        console.log('🔄 Loading data from Supabase...');
+        
+        // Fetch all data in parallel
+        const [dbProducts, dbCategories, dbDeals, dbBanners] = await Promise.all([
+          fetchProductsFromSupabase(),
+          fetchCategoriesFromSupabase(),
+          fetchDealsFromSupabase(),
+          fetchBannersFromSupabase(),
+        ]);
+
+        // If database has data, use it (database is source of truth)
+        if (dbProducts.length > 0) {
+          setProducts(dbProducts);
+          localStorage.setItem('idealpoint_products', JSON.stringify(dbProducts));
+          console.log('✅ Loaded', dbProducts.length, 'products from Supabase');
+        } else {
+          // Database is empty, sync localStorage data to Supabase
+          console.log('📤 Database empty, syncing localStorage products to Supabase...');
+          const savedProducts = localStorage.getItem('idealpoint_products');
+          const localProducts = savedProducts ? JSON.parse(savedProducts) : allProducts;
+          
+          if (localProducts.length > 0) {
+            for (const product of localProducts) {
+              await saveProductToSupabase(product);
+            }
+            console.log('✅ Synced', localProducts.length, 'products to Supabase');
+            // Refresh state after sync
+            setProducts(localProducts);
+          }
+        }
+
+        if (dbCategories.length > 0) {
+          setCategories(dbCategories);
+          localStorage.setItem('idealpoint_categories', JSON.stringify(dbCategories));
+          console.log('✅ Loaded', dbCategories.length, 'categories from Supabase');
+        } else {
+          console.log('📤 Database empty, syncing localStorage categories to Supabase...');
+          const savedCategories = localStorage.getItem('idealpoint_categories');
+          const localCategories = savedCategories ? JSON.parse(savedCategories) : defaultCategories;
+          
+          if (localCategories.length > 0) {
+            for (const category of localCategories) {
+              await saveCategoryToSupabase(category);
+            }
+            console.log('✅ Synced', localCategories.length, 'categories to Supabase');
+            setCategories(localCategories);
+          }
+        }
+
+        if (dbDeals.length > 0) {
+          setDeals(dbDeals);
+          localStorage.setItem('idealpoint_deals', JSON.stringify(dbDeals));
+          console.log('✅ Loaded', dbDeals.length, 'deals from Supabase');
+        } else {
+          console.log('📤 Database empty, syncing localStorage deals to Supabase...');
+          const savedDeals = localStorage.getItem('idealpoint_deals');
+          const localDeals = savedDeals ? JSON.parse(savedDeals) : defaultDeals;
+          
+          if (localDeals.length > 0) {
+            for (const deal of localDeals) {
+              await saveDealToSupabase(deal);
+            }
+            console.log('✅ Synced', localDeals.length, 'deals to Supabase');
+            setDeals(localDeals);
+          }
+        }
+
+        if (dbBanners.length > 0) {
+          setBanners(dbBanners);
+          localStorage.setItem('idealpoint_banners', JSON.stringify(dbBanners));
+          console.log('✅ Loaded', dbBanners.length, 'banners from Supabase');
+        } else {
+          console.log('📤 Database empty, syncing localStorage banners to Supabase...');
+          const savedBanners = localStorage.getItem('idealpoint_banners');
+          const localBanners = savedBanners ? JSON.parse(savedBanners) : defaultBanners;
+          
+          if (localBanners.length > 0) {
+            for (const banner of localBanners) {
+              await saveBannerToSupabase(banner);
+            }
+            console.log('✅ Synced', localBanners.length, 'banners to Supabase');
+            setBanners(localBanners);
+          }
+        }
+
+        console.log('✅ Data sync complete');
+      } catch (error) {
+        console.error('❌ Error loading data from Supabase:', error);
+        console.log('📦 Using localStorage fallback');
+      }
+    };
+
+    loadDataFromSupabase();
+  }, []);
+
   // Store Settings State - Centralized
   const [storeSettings, setStoreSettings] = useState(() => {
     const savedSettings = localStorage.getItem('idealpoint_settings');
@@ -114,10 +214,10 @@ function AppContent() {
   useEffect(() => {
     const fetchSettings = async () => {
         try {
-            const { projectId, publicAnonKey } = await import('./utils/supabase/info');
-            const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-b09ae082/settings`, {
+            const { getFunctionUrl, getPublicAnonKey } = await import('./config/supabase');
+            const response = await fetch(getFunctionUrl('make-server-b09ae082/settings'), {
                 headers: { 
-                    'Authorization': `Bearer ${publicAnonKey}`
+                    'Authorization': `Bearer ${getPublicAnonKey()}`
                 }
             });
             if (response.ok) {
@@ -141,11 +241,11 @@ function AppContent() {
     
     // Save to server
     try {
-        const { projectId, publicAnonKey } = await import('./utils/supabase/info');
-        await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-b09ae082/settings`, {
+        const { getFunctionUrl, getPublicAnonKey } = await import('./config/supabase');
+        await fetch(getFunctionUrl('make-server-b09ae082/settings'), {
             method: 'POST',
             headers: { 
-                'Authorization': `Bearer ${publicAnonKey}`,
+                'Authorization': `Bearer ${getPublicAnonKey()}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(updatedSettings)
@@ -182,23 +282,193 @@ function AppContent() {
     console.log('✅ Banners synced to localStorage:', banners.length, 'items');
   }, [banners]);
 
-  const [orders, setOrders] = useState<any[]>(() => {
-    // Reset orders as requested by user
-    return [];
+  const [orders, setOrders] = useState<Order[]>(() => {
+    // Load from localStorage on init
+    const saved = localStorage.getItem('idealpoint_orders');
+    return saved ? JSON.parse(saved) : [];
   });
+
+  // Load orders from database on mount
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const dbOrders = await fetchOrders(user?.id);
+        
+        if (dbOrders.length > 0) {
+          // Merge database orders with local orders (database takes priority)
+          setOrders(prevOrders => {
+            const merged = [...dbOrders];
+            // Add local orders that don't exist in database
+            prevOrders.forEach(localOrder => {
+              if (!dbOrders.find(dbOrder => dbOrder.id === localOrder.id)) {
+                merged.push(localOrder);
+              }
+            });
+            return merged;
+          });
+          console.log('✅ Orders loaded from database:', dbOrders.length);
+        }
+      } catch (error) {
+        console.error('Error loading orders from database:', error);
+      }
+    };
+    
+    loadOrders();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('idealpoint_orders', JSON.stringify(orders));
   }, [orders]);
 
-  const handleAddOrder = (newOrder: any) => {
-    setOrders([newOrder, ...orders]);
+  const handleAddOrder = async (newOrder: Order) => {
+    // Order is already saved to database in CheckoutView
+    // Just add to local state
+    setOrders(prevOrders => {
+      // Check if order already exists
+      const exists = prevOrders.find(o => o.id === newOrder.id);
+      if (exists) {
+        return prevOrders.map(o => o.id === newOrder.id ? newOrder : o);
+      }
+      return [newOrder, ...prevOrders];
+    });
   };
 
-  const handleUpdateOrder = (orderId: string, orderData: any) => {
-    setOrders(orders.map(order => 
-      order.id === orderId ? { ...order, ...orderData } : order
-    ));
+  const handleUpdateOrder = async (orderId: string, orderData: Partial<Order>) => {
+    const oldOrder = orders.find(o => o.id === orderId);
+    if (!oldOrder) {
+      console.error('Order not found:', orderId);
+      toast.error('Order not found');
+      return;
+    }
+
+    // Update local state immediately
+    const updatedOrder = { ...oldOrder, ...orderData };
+    const updatedOrders = orders.map(order => 
+      order.id === orderId ? updatedOrder : order
+    );
+    setOrders(updatedOrders);
+
+    // Update in database
+    let dbUpdatedOrder: Order | null = null;
+    try {
+      console.log('🔄 Updating order in database:', orderId, orderData);
+      dbUpdatedOrder = await updateOrderInDb(orderId, orderData);
+      if (dbUpdatedOrder) {
+        // Update local state with database response
+        setOrders(prevOrders => 
+          prevOrders.map(o => o.id === orderId ? dbUpdatedOrder! : o)
+        );
+        console.log('✅ Order updated in database:', orderId, 'Status:', dbUpdatedOrder.status);
+        toast.success('Order updated successfully');
+      } else {
+        console.warn('⚠️ Order update returned null');
+        toast.error('Failed to update order in database');
+      }
+    } catch (error: any) {
+      console.error('❌ Error updating order in database:', error);
+      toast.error(`Failed to update order: ${error.message || 'Unknown error'}`);
+    }
+
+    // Trigger order status change automation ONLY when status actually changes
+    const oldStatus = oldOrder.status;
+    const newStatus = orderData.status || updatedOrder.status || oldStatus;
+    
+    if (oldStatus !== newStatus && newStatus) {
+      const orderNumber = oldOrder.orderNumber || updatedOrder.orderNumber || orderId;
+      const orderTotal = updatedOrder.total || oldOrder.total || 0;
+      
+      console.log(`🔄 Order status changed: ${oldStatus} → ${newStatus} (Order: ${orderNumber})`);
+      
+      // Get customer user ID from order - try multiple sources
+      let customerUserId: string | undefined = undefined;
+      
+      // Try to get from updated order first
+      if (dbUpdatedOrder?.userId) {
+        customerUserId = dbUpdatedOrder.userId;
+      } else if (updatedOrder.userId) {
+        customerUserId = updatedOrder.userId;
+      } else if (oldOrder.userId) {
+        customerUserId = oldOrder.userId;
+      } else {
+        // Try to get from current session
+        try {
+          const { supabase } = await import('./config/supabase');
+          const { data: { user } } = await supabase.auth.getUser();
+          customerUserId = user?.id;
+        } catch (err) {
+          console.warn('Could not get user ID from session');
+        }
+      }
+      
+      console.log('🔔 Triggering notifications for order:', orderId, 'Status change:', `${oldStatus} → ${newStatus}`, 'User:', customerUserId || 'all');
+      
+      try {
+        const { triggerAutomation } = await import('./utils/notificationAutomation');
+        
+        // Trigger general status change notification
+        await triggerAutomation('order_status_changed', {
+          orderNumber,
+          orderId,
+          oldStatus,
+          newStatus,
+          status: newStatus,
+          total: orderTotal,
+          customerName: updatedOrder.customerName || oldOrder.customerName,
+        }, customerUserId);
+        
+        // Trigger specific status triggers ONLY when status actually changes to that status
+        if (newStatus === 'confirmed' && oldStatus !== 'confirmed') {
+          console.log('🔔 Triggering order_confirmed automation (status changed to confirmed)');
+          await triggerAutomation('order_confirmed', {
+            orderNumber,
+            orderId,
+            total: orderTotal,
+            estimatedTime: '30-45 minutes',
+            customerName: updatedOrder.customerName || oldOrder.customerName,
+          }, customerUserId);
+        } else if (newStatus === 'preparing' && oldStatus !== 'preparing') {
+          console.log('🔔 Triggering order_preparing automation');
+          await triggerAutomation('order_preparing', {
+            orderNumber,
+            orderId,
+            total: orderTotal,
+          }, customerUserId);
+        } else if (newStatus === 'ready' && oldStatus !== 'ready') {
+          console.log('🔔 Triggering order_ready automation');
+          await triggerAutomation('order_ready', {
+            orderNumber,
+            orderId,
+            total: orderTotal,
+          }, customerUserId);
+        } else if (newStatus === 'completed' && oldStatus !== 'completed') {
+          console.log('🔔 Triggering order_completed automation');
+          await triggerAutomation('order_completed', {
+            orderNumber,
+            orderId,
+            total: orderTotal,
+          }, customerUserId);
+        } else if (newStatus === 'cancelled' && oldStatus !== 'cancelled') {
+          console.log('🔔 Triggering order_cancelled automation');
+          await triggerAutomation('order_cancelled', {
+            orderNumber,
+            orderId,
+            total: orderTotal,
+          }, customerUserId);
+        }
+        
+        console.log('✅ Notifications triggered successfully for status change:', `${oldStatus} → ${newStatus}`);
+        
+        // Force refresh notifications for user
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('refreshNotifications'));
+          console.log('🔄 Notification refresh event dispatched');
+        }, 1000); // Wait 1 second for notification to be created
+      } catch (error: any) {
+        console.error('❌ Error triggering status change automation:', error);
+        toast.error(`Order updated but notification failed: ${error.message || 'Unknown error'}`);
+      }
+    }
   };
 
   // Welcome message on mount
@@ -216,16 +486,18 @@ function AppContent() {
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeView, setActiveView] = useState("home");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Get current view from URL path
+  const currentPath = location.pathname;
   
   // Sidebars
   const [isMenuSidebarOpen, setIsMenuSidebarOpen] = useState(false);
   const [isOrdersSidebarOpen, setIsOrdersSidebarOpen] = useState(false);
   
-  // Admin Panel
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  // Check if we're on admin route
+  const isAdminRoute = currentPath === '/admin';
   
   // Wishlist - Start with empty wishlist
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
@@ -254,10 +526,29 @@ function AppContent() {
   const handleViewChange = (view: string) => {
     if (view === "logout") {
       supabase.auth.signOut();
-      setActiveView("home");
+      navigate("/");
       return;
     }
-    setActiveView(view);
+    
+    // Map view names to routes
+    const routeMap: Record<string, string> = {
+      "home": "/",
+      "products": "/products",
+      "cart": "/cart",
+      "checkout": "/checkout",
+      "orderSuccess": "/order-success",
+      "account": "/account",
+      "orders": "/orders",
+      "wishlist": "/wishlist",
+      "editProfile": "/edit-profile",
+      "savedAddresses": "/saved-addresses",
+      "login": "/login",
+      "register": "/register",
+      "admin": "/admin"
+    };
+    
+    const route = routeMap[view] || "/";
+    navigate(route);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -265,8 +556,6 @@ function AppContent() {
     // Map "Fries" to "Sides" since products use "Sides" category
     const mappedCategory = categoryName === "Fries" ? "Sides" : categoryName;
     setSelectedCategory(mappedCategory);
-    setActiveView("products"); // Navigate to menu screen
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSearch = (query: string) => {
@@ -290,24 +579,51 @@ function AppContent() {
   };
 
   // Admin Product CRUD Functions
-  const handleAddProduct = (productData: Omit<Product, 'id'>) => {
+  const handleAddProduct = async (productData: Omit<Product, 'id'>) => {
     const newProduct: Product = {
       ...productData,
       id: `product-${Date.now()}`,
     };
+    
+    // Update local state immediately
     setProducts([...products, newProduct]);
+    
+    // Save to Supabase
+    const success = await saveProductToSupabase(newProduct);
+    if (success) {
+      console.log('✅ Product saved to Supabase:', newProduct.id);
+    }
   };
 
-  const handleUpdateProduct = (productId: string, productData: Partial<Product>) => {
+  const handleUpdateProduct = async (productId: string, productData: Partial<Product>) => {
+    const updatedProduct = products.find(p => p.id === productId);
+    if (!updatedProduct) return;
+
+    const mergedProduct = { ...updatedProduct, ...productData };
+    
+    // Update local state immediately
     setProducts(products.map(p => 
-      p.id === productId ? { ...p, ...productData } : p
+      p.id === productId ? mergedProduct : p
     ));
+    
+    // Save to Supabase
+    const success = await saveProductToSupabase(mergedProduct);
+    if (success) {
+      console.log('✅ Product updated in Supabase:', productId);
+    }
   };
 
-  const handleDeleteProduct = (productId: string) => {
+  const handleDeleteProduct = async (productId: string) => {
+    // Update local state immediately
     setProducts(products.filter(p => p.id !== productId));
     // Remove from wishlist if exists
     setWishlistItems(wishlistItems.filter(item => item.id !== productId));
+    
+    // Delete from Supabase
+    const success = await deleteProductFromSupabase(productId);
+    if (success) {
+      console.log('✅ Product deleted from Supabase:', productId);
+    }
   };
 
   const handleResetProducts = () => {
@@ -325,25 +641,52 @@ function AppContent() {
   };
 
   // Category CRUD Functions
-  const handleAddCategory = (categoryData: Omit<Category, 'id'>) => {
+  const handleAddCategory = async (categoryData: Omit<Category, 'id'>) => {
     const newCategory: Category = {
       ...categoryData,
       id: `cat-${Date.now()}`,
     };
+    
+    // Update local state immediately
     setCategories([...categories, newCategory]);
+    
+    // Save to Supabase
+    const success = await saveCategoryToSupabase(newCategory);
+    if (success) {
+      console.log('✅ Category saved to Supabase:', newCategory.id);
+    }
   };
 
-  const handleUpdateCategory = (categoryId: string, categoryData: Partial<Category>) => {
+  const handleUpdateCategory = async (categoryId: string, categoryData: Partial<Category>) => {
+    const updatedCategory = categories.find(cat => cat.id === categoryId);
+    if (!updatedCategory) return;
+
+    const mergedCategory = { ...updatedCategory, ...categoryData };
+    
+    // Update local state immediately
     setCategories(categories.map(cat => 
-      cat.id === categoryId ? { ...cat, ...categoryData } : cat
+      cat.id === categoryId ? mergedCategory : cat
     ));
+    
+    // Save to Supabase
+    const success = await saveCategoryToSupabase(mergedCategory);
+    if (success) {
+      console.log('✅ Category updated in Supabase:', categoryId);
+    }
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
+  const handleDeleteCategory = async (categoryId: string) => {
+    // Update local state immediately
     setCategories(categories.filter(cat => cat.id !== categoryId));
+    
+    // Delete from Supabase
+    const success = await deleteCategoryFromSupabase(categoryId);
+    if (success) {
+      console.log('✅ Category deleted from Supabase:', categoryId);
+    }
   };
 
-  const handleReorderCategory = (categoryId: string, direction: 'up' | 'down') => {
+  const handleReorderCategory = async (categoryId: string, direction: 'up' | 'down') => {
     const index = categories.findIndex(cat => cat.id === categoryId);
     if (index === -1) return;
     
@@ -359,91 +702,121 @@ function AppContent() {
       cat.displayOrder = idx + 1;
     });
     
+    // Update local state immediately
     setCategories(newCategories);
+    
+    // Save all categories to Supabase
+    for (const cat of newCategories) {
+      await saveCategoryToSupabase(cat);
+    }
+    console.log('✅ Categories reordered and saved to Supabase');
   };
 
   // Deal CRUD Functions
-  const handleAddDeal = (dealData: Omit<Deal, 'id'>) => {
+  const handleAddDeal = async (dealData: Omit<Deal, 'id'>) => {
     const newDeal: Deal = {
       ...dealData,
       id: `deal-${Date.now()}`,
     };
+    
+    // Update local state immediately
     setDeals([...deals, newDeal]);
+    
+    // Save to Supabase
+    const success = await saveDealToSupabase(newDeal);
+    if (success) {
+      console.log('✅ Deal saved to Supabase:', newDeal.id);
+    }
   };
 
-  const handleUpdateDeal = (dealId: string, dealData: Partial<Deal>) => {
+  const handleUpdateDeal = async (dealId: string, dealData: Partial<Deal>) => {
+    const updatedDeal = deals.find(deal => deal.id === dealId);
+    if (!updatedDeal) return;
+
+    const mergedDeal = { ...updatedDeal, ...dealData };
+    
+    // Update local state immediately
     setDeals(deals.map(deal => 
-      deal.id === dealId ? { ...deal, ...dealData } : deal
+      deal.id === dealId ? mergedDeal : deal
     ));
+    
+    // Save to Supabase
+    const success = await saveDealToSupabase(mergedDeal);
+    if (success) {
+      console.log('✅ Deal updated in Supabase:', dealId);
+    }
   };
 
-  const handleDeleteDeal = (dealId: string) => {
+  const handleDeleteDeal = async (dealId: string) => {
+    // Update local state immediately
     setDeals(deals.filter(deal => deal.id !== dealId));
+    
+    // Delete from Supabase
+    const success = await deleteDealFromSupabase(dealId);
+    if (success) {
+      console.log('✅ Deal deleted from Supabase:', dealId);
+    }
   };
 
   // Banner CRUD Functions
-  const handleAddBanner = (bannerData: Omit<Banner, 'id'>) => {
+  const handleAddBanner = async (bannerData: Omit<Banner, 'id'>) => {
     const newBanner: Banner = {
       ...bannerData,
       id: `banner-${Date.now()}`,
     };
+    
+    // Update local state immediately
     setBanners([...banners, newBanner]);
+    
+    // Save to Supabase
+    const success = await saveBannerToSupabase(newBanner);
+    if (success) {
+      console.log('✅ Banner saved to Supabase:', newBanner.id);
+    }
   };
 
-  const handleUpdateBanner = (bannerId: string, bannerData: Partial<Banner>) => {
+  const handleUpdateBanner = async (bannerId: string, bannerData: Partial<Banner>) => {
+    const updatedBanner = banners.find(banner => banner.id === bannerId);
+    if (!updatedBanner) return;
+
+    const mergedBanner = { ...updatedBanner, ...bannerData };
+    
+    // Update local state immediately
     setBanners(banners.map(banner => 
-      banner.id === bannerId ? { ...banner, ...bannerData } : banner
+      banner.id === bannerId ? mergedBanner : banner
     ));
+    
+    // Save to Supabase
+    const success = await saveBannerToSupabase(mergedBanner);
+    if (success) {
+      console.log('✅ Banner updated in Supabase:', bannerId);
+    }
   };
 
-  const handleDeleteBanner = (bannerId: string) => {
+  const handleDeleteBanner = async (bannerId: string) => {
+    // Update local state immediately
     setBanners(banners.filter(banner => banner.id !== bannerId));
+    
+    // Delete from Supabase
+    const success = await deleteBannerFromSupabase(bannerId);
+    if (success) {
+      console.log('✅ Banner deleted from Supabase:', bannerId);
+    }
   };
 
   const handleMenuItemClick = (item: "wishlist" | "orders" | "profile" | "home") => {
     setIsMenuSidebarOpen(false);
     if (item === "wishlist") {
-      setActiveView("wishlist");
+      navigate("/wishlist");
     } else if (item === "orders") {
       setIsOrdersSidebarOpen(true);
     } else if (item === "profile") {
-      setActiveView("account");
+      navigate("/account");
     } else if (item === "home") {
-      setActiveView("home");
+      navigate("/");
     }
   };
 
-  // Filter products for search only (not category on home screen)
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = searchQuery === "" || 
-      product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
-  });
-
-  // Popular products - filter by isPopular flag (set in Admin Panel)
-  const popularProducts = products.filter(p => p.isPopular === true);
-
-  const activeDeals = deals.filter(d => d.isActive);
-  
-  // Sort active deals by display order
-  const sortedActiveDeals = activeDeals.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-
-  // Logic to determine which deal goes where
-  // 1. Flash Sale: Either explicitly set via template, or the one with highest discount
-  const flashSaleDeal = sortedActiveDeals.find(d => d.template === 'flash_sale') 
-    || sortedActiveDeals.reduce((prev, current) => (prev && prev.discountPercentage > current.discountPercentage) ? prev : current, undefined as Deal | undefined);
-
-  // 2. Other deals for the list/grid section
-  const otherDeals = sortedActiveDeals.filter(d => d.id !== flashSaleDeal?.id);
-
-  const handleDealClick = (deal: Deal) => {
-    if (deal.productId) {
-      const product = products.find(p => p.id === deal.productId);
-      if (product) {
-        handleProductClick(product);
-      }
-    }
-  };
 
   const handleNotificationInteraction = async (notification: any) => {
     await markAsRead(notification.id);
@@ -455,7 +828,7 @@ function AppContent() {
       }
     } else if (notification.dealId) {
       // Logic to handle deal click - for now just go to deals view if exists or products view
-      setActiveView('home'); // Deals are on home usually
+      navigate('/'); // Deals are on home usually
       // Could also scroll to deals section
     }
   };
@@ -469,13 +842,13 @@ function AppContent() {
     >
       {/* Desktop Navigation Bar - Hidden on Mobile, Replaces TopHeader on Desktop */}
       <div className="hidden lg:block">
-        {!showAdminPanel && (
+        {!isAdminRoute && (
           <DesktopNavBar
-            activeView={activeView}
+            activeView={currentPath}
             onViewChange={handleViewChange}
             cartCount={cartItems.length}
             wishlistCount={wishlistItems.length}
-            onAdminAccess={() => setShowAdminPanel(true)}
+            onAdminAccess={() => navigate('/admin')}
             onNotificationItemClick={handleNotificationInteraction}
             user={user}
             storeSettings={storeSettings}
@@ -542,10 +915,10 @@ function AppContent() {
       <div className="relative" style={{ zIndex: 1 }}>
       {/* Mobile Top Header - Hidden on Desktop */}
       <div className="lg:hidden">
-        {!showAdminPanel && (
+        {!isAdminRoute && (
           <TopHeader 
-            onCartClick={() => setActiveView("cart")}
-            onWishlistClick={() => setActiveView("wishlist")}
+            onCartClick={() => navigate("/cart")}
+            onWishlistClick={() => navigate("/wishlist")}
             cartCount={cartItems.length}
             wishlistCount={wishlistItems.length}
             onNotificationItemClick={handleNotificationInteraction}
@@ -556,320 +929,51 @@ function AppContent() {
 
       {/* Main Content */}
       <main className="pt-20 lg:pt-24 pb-28 lg:pb-12 px-4 lg:px-12 max-w-[1600px] lg:mx-auto">
-        {/* HOME VIEW */}
-        {activeView === "home" && (
-          <div className="space-y-6 mt-6">
-            {/* Search Bar */}
-            <SearchBar onSearch={handleSearch} />
-
-            {/* Show search results if searching, otherwise show normal home content */}
-            {searchQuery.trim() !== "" ? (
-              // INSTANT SEARCH RESULTS
-              <div className="py-6 lg:py-12">
-                <div className="flex items-center justify-between mb-4 lg:mb-8">
-                  <div>
-                    <h2 className="text-lg lg:text-3xl font-bold text-gray-900 mb-1">
-                      Search Results for "{searchQuery}"
-                    </h2>
-                    <p className="hidden lg:block text-gray-600">
-                      Found {filteredProducts.length} item{filteredProducts.length !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => setSearchQuery("")}
-                    className="px-4 lg:px-8 py-2 lg:py-3 rounded-xl text-sm lg:text-base font-bold backdrop-blur-md transition-all hover:scale-105"
-                    style={{
-                      background: 'rgba(255, 159, 64, 0.1)',
-                      color: '#FF9F40',
-                      border: '1px solid rgba(255, 159, 64, 0.2)',
-                    }}
-                  >
-                    Clear Search
-                  </button>
-                </div>
-
-                {filteredProducts.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-6">
-                    {filteredProducts.map((product) => (
-                      <HomeProductCard
-                        key={product.id}
-                        product={product}
-                        onClick={() => handleProductClick(product)}
-                        isPopular={false}
-                        isInWishlist={wishlistItems.some(item => item.id === product.id)}
-                        onAddToWishlist={handleAddToWishlist}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 lg:py-24 px-4">
-                    <div className="text-6xl lg:text-9xl mb-4 lg:mb-6">🔍</div>
-                    <p className="text-gray-500 font-bold text-lg lg:text-2xl">No products found</p>
-                    <p className="text-gray-400 text-sm lg:text-lg mt-2">Try searching for something else</p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              // NORMAL HOME CONTENT
-              <>
-                {/* Hero Banner - Mobile Only */}
-                <div className="lg:hidden">
-                  <NewHeroBanner banners={banners.filter(b => b.type === 'hero' && b.isActive)} />
-                </div>
-
-                {/* Desktop Hero - Full Width Professional */}
-                <div className="hidden lg:block -mx-12">
-                  <div className="relative w-full overflow-hidden" style={{ height: `${storeSettings.bannerHeight || 500}px` }}>
-                    {(() => {
-                      const activeBanners = banners.filter(b => b.type === 'hero' && b.isActive);
-                      const layout = storeSettings.bannerLayout || 'single';
-                      const height = `${storeSettings.bannerHeight || 500}px`;
-                      const padding = storeSettings.bannerPadding !== undefined ? storeSettings.bannerPadding : 48;
-
-                      if (layout === 'grid-2') {
-                        return (
-                          <div 
-                            className="grid grid-cols-2 gap-6 h-full"
-                            style={{ paddingLeft: `${padding}px`, paddingRight: `${padding}px` }}
-                          >
-                            {[0, 1].map(i => (
-                              <div key={i} className="rounded-[2rem] overflow-hidden h-full relative shadow-xl transform transition-transform hover:scale-[1.01]">
-                                <NewHeroBanner 
-                                  banners={activeBanners.length > i ? [activeBanners[i]] : []} 
-                                  layout="grid-2"
-                                  desktopHeight={height}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      }
-
-                      if (layout === 'grid-3') {
-                        return (
-                          <div 
-                            className="grid grid-cols-3 gap-6 h-full"
-                            style={{ paddingLeft: `${padding}px`, paddingRight: `${padding}px` }}
-                          >
-                            {[0, 1, 2].map(i => (
-                              <div key={i} className="rounded-[2rem] overflow-hidden h-full relative shadow-xl transform transition-transform hover:scale-[1.01]">
-                                <NewHeroBanner 
-                                  banners={activeBanners.length > i ? [activeBanners[i]] : []} 
-                                  layout="grid-3"
-                                  desktopHeight={height}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      }
-
-                      // Single layout
-                      return (
-                        <div style={{ paddingLeft: layout === 'single' ? 0 : `${padding}px`, paddingRight: layout === 'single' ? 0 : `${padding}px` }}>
-                          <NewHeroBanner banners={activeBanners} layout="single" desktopHeight={height} />
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                {/* Categories - Mobile Only */}
-                <div className="lg:hidden">
-                  <NewCategories 
-                    selectedCategory={selectedCategory}
-                    onCategorySelect={handleCategorySelect}
-                    categories={categories}
-                  />
-                </div>
-
-                {/* Desktop Category Showcase - Professional Grid */}
-                <div className="hidden lg:block">
-                  <DesktopCategoryShowcase
-                    selectedCategory={selectedCategory}
-                    onCategorySelect={handleCategorySelect}
-                    categories={categories}
-                  />
-                </div>
-
-                {/* Deals Section */}
-                <div className="hidden lg:block">
-                  <DesktopDealsSection deals={otherDeals} onDealClick={handleDealClick} />
-                </div>
-
-                {/* Desktop Featured Deals - Only on Desktop */}
-                <div className="hidden lg:block">
-                  <DesktopFeaturedDeals
-                    products={popularProducts}
-                    onProductClick={handleProductClick}
-                  />
-                </div>
-
-                {/* Desktop Promo Banner - Only on Desktop */}
-                <div className="hidden lg:block">
-                  <DesktopPromoBanner banner={banners.find(b => b.type === 'promo' && b.isActive)} />
-                </div>
-
-                {/* Products Section */}
-                <div className="py-6 lg:py-12">
-                  <div className="flex items-center justify-between mb-4 lg:mb-8">
-                    <div>
-                      <h2 className="text-lg lg:text-3xl font-bold text-gray-900 mb-1">
-                        {activeView === "home" ? "Popular Items" : "All Menu Items"}
-                      </h2>
-                      <p className="hidden lg:block text-gray-600">
-                        Handpicked favorites just for you
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => setActiveView("products")}
-                      className="px-4 lg:px-8 py-2 lg:py-3 rounded-xl text-sm lg:text-base font-bold backdrop-blur-md transition-all hover:scale-105"
-                      style={{
-                        background: 'rgba(255, 159, 64, 0.1)',
-                        color: '#FF9F40',
-                        border: '1px solid rgba(255, 159, 64, 0.2)',
-                      }}
-                    >
-                      See All Menu
-                    </button>
-                  </div>
-
-                  {/* Product Grid - Responsive: 2 cols mobile, 3 tablet, 5 desktop */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-6">
-                    {popularProducts.slice(0, activeView === "home" ? 10 : 8).map((product, index) => (
-                      <HomeProductCard
-                        key={product.id}
-                        product={product}
-                        onClick={() => handleProductClick(product)}
-                        isPopular={index < 2}
-                        isInWishlist={wishlistItems.some(item => item.id === product.id)}
-                        onAddToWishlist={handleAddToWishlist}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Flash Sale Card */}
-                <FlashSaleCard deal={flashSaleDeal} onDealClick={handleDealClick} />
-
-              </>
-            )}
-          </div>
-        )}
-
-        {/* PRODUCTS VIEW */}
-        {activeView === "products" && (
-          <ProductsView
-            onProductClick={handleProductClick}
-            selectedCategory={selectedCategory === "all" ? null : selectedCategory}
-            searchQuery={searchQuery}
-            onSearch={handleSearch}
-            onBack={() => setActiveView("home")}
-            products={products}
-            wishlistItems={wishlistItems}
-            onAddToWishlist={handleAddToWishlist}
-          />
-        )}
-
-        {/* CART VIEW */}
-        {activeView === "cart" && (
-          <CartView
-            onContinueShopping={() => setActiveView("home")}
-            onCheckout={() => setActiveView("checkout")}
-            deals={deals}
-            deliveryFee={storeSettings.deliveryFee}
-          />
-        )}
-
-        {/* CHECKOUT VIEW */}
-        {activeView === "checkout" && (
-          <CheckoutView
-            onBack={() => setActiveView("cart")}
-            onSuccess={() => setActiveView("orderSuccess")}
-            deliveryFee={storeSettings.deliveryFee}
-            onAddOrder={handleAddOrder}
-            user={user}
-            storeSettings={storeSettings}
-          />
-        )}
-
-        {/* ORDER SUCCESS VIEW */}
-        {activeView === "orderSuccess" && (
-          <OrderSuccessView 
-            onContinueShopping={() => setActiveView("home")} 
-            latestOrder={orders[0]}
-            onTrackOrder={() => setActiveView("orders")}
-          />
-        )}
-
-        {/* ACCOUNT VIEW */}
-        {activeView === "account" && (
-          <AccountView
-            onNavigateToEditProfile={() => setActiveView("editProfile")}
-            onNavigateToAddresses={() => setActiveView("savedAddresses")}
-            onNavigateToOrders={() => setActiveView("orders")}
-            onNavigateToWishlist={() => setActiveView("wishlist")}
-            onLogout={() => handleViewChange("logout")}
-            onNavigateToLogin={() => setActiveView("login")}
-            user={user}
-            storeSettings={storeSettings}
-          />
-        )}
-
-        {/* ORDERS VIEW */}
-        {activeView === "orders" && (
-          <OrdersView 
-            onBack={() => setActiveView("account")} 
-            orders={orders}
-            storeSettings={storeSettings}
-          />
-        )}
-
-        {/* WISHLIST VIEW */}
-        {activeView === "wishlist" && (
-          <WishlistView 
-            onBack={() => setActiveView("home")} 
-            onProductClick={handleProductClick}
-            wishlistItems={wishlistItems}
-            onRemoveFromWishlist={handleRemoveFromWishlist}
-          />
-        )}
-
-        {/* EDIT PROFILE VIEW */}
-        {activeView === "editProfile" && (
-          <EditProfileView onBack={() => setActiveView("account")} />
-        )}
-
-        {/* SAVED ADDRESSES VIEW */}
-        {activeView === "savedAddresses" && (
-          <SavedAddressesView onBack={() => setActiveView("account")} />
-        )}
-
-        {/* LOGIN VIEW */}
-        {activeView === "login" && (
-          <LoginView 
-            onNavigateToRegister={() => setActiveView("register")}
-            onLoginSuccess={() => setActiveView("home")}
-            onBack={() => setActiveView("home")}
-          />
-        )}
-
-        {/* REGISTER VIEW */}
-        {activeView === "register" && (
-          <RegisterView 
-            onNavigateToLogin={() => setActiveView("login")}
-            onRegisterSuccess={() => setActiveView("home")}
-            onBack={() => setActiveView("home")}
-            storeSettings={storeSettings}
-          />
-        )}
+        <AppRoutes
+          navigate={navigate}
+          handleViewChange={handleViewChange}
+          products={products}
+          categories={categories}
+          deals={deals}
+          banners={banners}
+          orders={orders}
+          wishlistItems={wishlistItems}
+          cartItems={cartItems}
+          selectedCategory={selectedCategory}
+          searchQuery={searchQuery}
+          storeSettings={storeSettings}
+          user={user}
+          handleProductClick={handleProductClick}
+          handleSearch={handleSearch}
+          handleAddToWishlist={handleAddToWishlist}
+          handleRemoveFromWishlist={handleRemoveFromWishlist}
+          handleAddOrder={handleAddOrder}
+          handleUpdateOrder={handleUpdateOrder}
+          handleAddProduct={handleAddProduct}
+          handleUpdateProduct={handleUpdateProduct}
+          handleDeleteProduct={handleDeleteProduct}
+          handleResetProducts={handleResetProducts}
+          handleAddCategory={handleAddCategory}
+          handleUpdateCategory={handleUpdateCategory}
+          handleDeleteCategory={handleDeleteCategory}
+          handleReorderCategory={handleReorderCategory}
+          handleResetCategories={handleResetCategories}
+          handleAddDeal={handleAddDeal}
+          handleUpdateDeal={handleUpdateDeal}
+          handleDeleteDeal={handleDeleteDeal}
+          handleAddBanner={handleAddBanner}
+          handleUpdateBanner={handleUpdateBanner}
+          handleDeleteBanner={handleDeleteBanner}
+          handleUpdateSettings={handleUpdateSettings}
+          onCategorySelect={handleCategorySelect}
+        />
       </main>
 
       {/* Bottom Navigation - Hidden on Desktop, Cart, Checkout, Login & Register */}
-      {activeView !== "checkout" && activeView !== "cart" && activeView !== "login" && activeView !== "register" && (
+      {!isAdminRoute && currentPath !== "/checkout" && currentPath !== "/cart" && currentPath !== "/login" && currentPath !== "/register" && (
         <div className="lg:hidden">
           <NewBottomNav
-            activeView={activeView}
+            activeView={currentPath}
             onViewChange={handleViewChange}
             cartCount={cartItems.length}
           />
@@ -916,37 +1020,6 @@ function AppContent() {
         ))}
       </AnimatePresence>
 
-      {/* Admin Panel */}
-      {showAdminPanel && (
-        <AdminPanel
-          onClose={() => setShowAdminPanel(false)}
-          products={products}
-          cartItems={cartItems}
-          onAddProduct={handleAddProduct}
-          onUpdateProduct={handleUpdateProduct}
-          onDeleteProduct={handleDeleteProduct}
-          onResetProducts={handleResetProducts}
-          categories={categories}
-          onAddCategory={handleAddCategory}
-          onUpdateCategory={handleUpdateCategory}
-          onDeleteCategory={handleDeleteCategory}
-          onReorderCategory={handleReorderCategory}
-          onResetCategories={handleResetCategories}
-          deals={deals}
-          onAddDeal={handleAddDeal}
-          onUpdateDeal={handleUpdateDeal}
-          onDeleteDeal={handleDeleteDeal}
-          banners={banners}
-          onAddBanner={handleAddBanner}
-          onUpdateBanner={handleUpdateBanner}
-          onDeleteBanner={handleDeleteBanner}
-          storeSettings={storeSettings}
-          onUpdateSettings={handleUpdateSettings}
-          orders={orders}
-          onUpdateOrder={handleUpdateOrder}
-          user={user}
-        />
-      )}
       </div>
     </div>
   );

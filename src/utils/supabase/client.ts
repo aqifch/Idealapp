@@ -1,7 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
-import { projectId, publicAnonKey } from "./info";
+/**
+ * Supabase Client
+ * 
+ * This file is kept for backward compatibility.
+ * New code should import from @/config/supabase instead.
+ */
 
-const supabaseUrl = `https://${projectId}.supabase.co`;
-const supabaseKey = publicAnonKey;
+import { supabase } from "../../config/supabase";
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export { supabase };

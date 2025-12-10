@@ -22,7 +22,7 @@ export const EnhancedCartBadge = ({
       setTimeout(() => setShouldAnimate(false), 1000);
     }
     setPrevCount(count);
-  }, [count]);
+  }, [count, prevCount]);
 
   // Animation variants
   const animations = {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   LayoutDashboard, 
@@ -40,12 +40,14 @@ import {
   Bell,
   Send,
   Trash,
-  Shield
+  Shield,
+  Menu
 } from "lucide-react";
 import { Product, Category, Deal, Banner, categories as defaultCategories, ProductSize } from "../data/mockData";
 import { allProducts } from "../data/allProducts";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { NotificationsAdmin } from "./NotificationsAdmin";
 import { UsersAdmin } from "./UsersAdmin";
 import { RolesAdmin } from "./RolesAdmin";
@@ -56,6 +58,7 @@ import { AdminBannerModal } from "./AdminBannerModal";
 import { SettingsAdmin } from "./SettingsAdmin";
 import { User } from "@supabase/supabase-js";
 import { usePermissions } from "../hooks/usePermissions";
+import { fetchOrders } from "../utils/orders";
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -153,12 +156,55 @@ export const AdminPanel = ({
   const [showEditBannerModal, setShowEditBannerModal] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState<Banner | null>(null);
   const [bannerSearchQuery, setBannerSearchQuery] = useState("");
+  const [bannerFilterType, setBannerFilterType] = useState<'all' | 'hero' | 'promo'>('all');
+  const [bannerFilterStatus, setBannerFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [previewBanner, setPreviewBanner] = useState<Banner | null>(null);
   
   // Order Management State
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [orderViewMode, setOrderViewMode] = useState<'pipeline' | 'list'>('pipeline');
   const [orderSearchQuery, setOrderSearchQuery] = useState("");
+  
+  // Dashboard Data Loading State
+  const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [localOrders, setLocalOrders] = useState<any[]>(orders);
+  
+  // Fetch orders for admin (fetch all orders, not just user's orders)
+  useEffect(() => {
+    const loadOrdersForAdmin = async () => {
+      // For admin users, always fetch all orders from database
+      if (user) {
+        // Show loading only on dashboard
+        if (activeSection === 'dashboard') {
+          setDashboardLoading(true);
+        }
+        try {
+          // For admin, fetch all orders (no userId filter)
+          console.log('🔄 Fetching all orders for admin...');
+          const allOrders = await fetchOrders();
+          setLocalOrders(allOrders);
+          console.log('✅ Loaded orders for admin:', allOrders.length);
+        } catch (error) {
+          console.error('❌ Error loading orders for admin:', error);
+        } finally {
+          setDashboardLoading(false);
+        }
+      } else if (orders.length > 0) {
+        // Update local orders when prop changes (for non-admin or when orders prop has data)
+        setLocalOrders(orders);
+      }
+    };
+    
+    loadOrdersForAdmin();
+  }, [orders, activeSection, user]);
+  
+  // Update local orders when orders prop changes
+  useEffect(() => {
+    if (orders.length > 0) {
+      setLocalOrders(orders);
+    }
+  }, [orders]);
 
   // Product CRUD Functions - Wrappers
   const handleAddProduct = (productData: Omit<Product, 'id'>) => {
@@ -255,15 +301,35 @@ export const AdminPanel = ({
   const getSalesData = () => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const salesByDay = new Array(7).fill(0);
+    const ordersToUse = localOrders.length > 0 ? localOrders : orders;
 
-    orders.forEach(order => {
-      if (order.status !== 'cancelled' && order.date) {
-        const date = new Date(order.date);
-        if (!isNaN(date.getTime())) {
-          salesByDay[date.getDay()] += (order.total || 0);
+    if (ordersToUse && ordersToUse.length > 0) {
+      ordersToUse.forEach(order => {
+        if (order.status !== 'cancelled') {
+          let date: Date | null = null;
+          
+          // Try different date formats
+          if (order.createdAt) {
+            date = new Date(order.createdAt);
+          } else if (order.date) {
+            // Handle string dates like "Dec 8, 2024"
+            date = new Date(order.date);
+            // If that fails, try parsing manually
+            if (isNaN(date.getTime())) {
+              // Try to parse common formats
+              const dateStr = order.date.toString();
+              date = new Date(dateStr);
+            }
+          }
+          
+          if (date && !isNaN(date.getTime())) {
+            const dayIndex = date.getDay();
+            const orderTotal = Number(order.total) || Number(order.total_amount) || 0;
+            salesByDay[dayIndex] += orderTotal;
+          }
         }
-      }
-    });
+      });
+    }
 
     return days.map((day, index) => ({
       name: day,
@@ -271,21 +337,42 @@ export const AdminPanel = ({
     }));
   };
 
-  const getStats = () => {
-    const activeOrders = orders.filter(o => o.status !== 'cancelled');
-    const totalRevenue = activeOrders.reduce((acc, order) => acc + (Number(order.total) || 0), 0);
-    const totalOrders = orders.length;
-    const uniqueCustomers = new Set(orders.map(o => o.customer)).size;
+  // Memoized stats calculation - recalculates when orders or products change
+  const stats = useMemo(() => {
+    const ordersToUse = localOrders.length > 0 ? localOrders : orders;
+    
+    if (!ordersToUse || ordersToUse.length === 0) {
+      return {
+        revenue: 0,
+        orders: 0,
+        products: products.length || 0,
+        customers: 0
+      };
+    }
+
+    const activeOrders = ordersToUse.filter(o => o.status !== 'cancelled');
+    const totalRevenue = activeOrders.reduce((acc, order) => {
+      const orderTotal = Number(order.total) || Number(order.total_amount) || 0;
+      return acc + orderTotal;
+    }, 0);
+    const totalOrders = ordersToUse.length;
+    
+    // Get unique customers - handle different customer field names
+    const customerSet = new Set();
+    ordersToUse.forEach(order => {
+      if (order.customer) customerSet.add(order.customer);
+      if (order.customerName) customerSet.add(order.customerName);
+      if (order.userId) customerSet.add(order.userId);
+    });
+    const uniqueCustomers = customerSet.size;
     
     return {
       revenue: totalRevenue,
       orders: totalOrders,
-      products: products.length,
+      products: products.length || 0,
       customers: uniqueCustomers
     };
-  };
-
-  const stats = getStats();
+  }, [localOrders, orders, products]);
 
   const getCategoryData = () => {
     return categories.map(cat => ({
@@ -296,58 +383,88 @@ export const AdminPanel = ({
 
   const COLORS = ['#FF9F40', '#FFB74D', '#FFCC80', '#FFE0B2', '#FFF3E0'];
 
-  const renderDashboard = () => (
-    <div className="space-y-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600">
-              <DollarSign className="w-6 h-6" />
-            </div>
+  const renderDashboard = () => {
+    // Show loading skeleton while data is being fetched
+    if (dashboardLoading && localOrders.length === 0 && orders.length === 0) {
+      return (
+        <div className="space-y-6">
+          {/* Loading Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm animate-pulse">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gray-200"></div>
+                </div>
+                <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                <div className="h-8 bg-gray-200 rounded w-32"></div>
+              </div>
+            ))}
           </div>
-          <p className="text-gray-500 text-sm font-medium">Total Revenue</p>
-          <h3 className="text-2xl font-black text-gray-900">Rs {stats.revenue.toLocaleString()}</h3>
-        </div>
-        
-        <div className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
-              <ShoppingBag className="w-6 h-6" />
-            </div>
+          {/* Loading Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {[1, 2].map((i) => (
+              <div key={i} className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm h-[400px] animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-32 mb-6"></div>
+                <div className="h-full bg-gray-100 rounded"></div>
+              </div>
+            ))}
           </div>
-          <p className="text-gray-500 text-sm font-medium">Total Orders</p>
-          <h3 className="text-2xl font-black text-gray-900">{stats.orders}</h3>
         </div>
+      );
+    }
 
-        <div className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600">
-              <Package className="w-6 h-6" />
+    return (
+      <div className="space-y-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600">
+                <DollarSign className="w-6 h-6" />
+              </div>
             </div>
+            <p className="text-gray-500 text-sm font-medium">Total Revenue</p>
+            <h3 className="text-2xl font-black text-gray-900">Rs {stats.revenue.toLocaleString()}</h3>
           </div>
-          <p className="text-gray-500 text-sm font-medium">Total Products</p>
-          <h3 className="text-2xl font-black text-gray-900">{stats.products}</h3>
-        </div>
+          
+          <div className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
+                <ShoppingBag className="w-6 h-6" />
+              </div>
+            </div>
+            <p className="text-gray-500 text-sm font-medium">Total Orders</p>
+            <h3 className="text-2xl font-black text-gray-900">{stats.orders}</h3>
+          </div>
 
-        <div className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center text-pink-600">
-              <Users className="w-6 h-6" />
+          <div className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600">
+                <Package className="w-6 h-6" />
+              </div>
             </div>
+            <p className="text-gray-500 text-sm font-medium">Total Products</p>
+            <h3 className="text-2xl font-black text-gray-900">{stats.products}</h3>
           </div>
-          <p className="text-gray-500 text-sm font-medium">Total Customers</p>
-          <h3 className="text-2xl font-black text-gray-900">{stats.customers}</h3>
+
+          <div className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center text-pink-600">
+                <Users className="w-6 h-6" />
+              </div>
+            </div>
+            <p className="text-gray-500 text-sm font-medium">Total Customers</p>
+            <h3 className="text-2xl font-black text-gray-900">{stats.customers}</h3>
+          </div>
         </div>
-      </div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Sales Chart */}
-        <div className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm h-[400px]">
+        <div className="p-6 rounded-2xl bg-white/50 backdrop-blur-xl border border-white/60 shadow-sm h-[400px] relative">
           <h3 className="text-lg font-black text-gray-900 mb-6">Weekly Sales</h3>
           {stats.revenue > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="calc(100% - 3rem)">
               <BarChart data={getSalesData()}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} dy={10} />
@@ -360,9 +477,10 @@ export const AdminPanel = ({
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-gray-400">
+            <div className="h-full flex flex-col items-center justify-center text-gray-400" style={{ height: 'calc(100% - 3rem)' }}>
               <BarChart3 className="w-16 h-16 mb-4 opacity-20" />
-              <p>No sales data available yet</p>
+              <p className="text-sm">No sales data available yet</p>
+              <p className="text-xs mt-2 text-gray-400">Orders will appear here once customers place orders</p>
             </div>
           )}
         </div>
@@ -392,7 +510,8 @@ export const AdminPanel = ({
         </div>
       </div>
     </div>
-  );
+    );
+  };
 
   const renderProducts = () => {
     const filteredProducts = products
@@ -764,10 +883,19 @@ export const AdminPanel = ({
     );
   };
 
-  const handleStatusChange = (orderId: string, newStatus: string) => {
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
     if (onUpdateOrder) {
-      onUpdateOrder(orderId, { status: newStatus });
-      toast.success(`Order status updated to ${newStatus}`);
+      try {
+        await onUpdateOrder(orderId, { status: newStatus });
+        toast.success(`Order status updated to ${newStatus}`);
+        console.log('✅ Order status updated:', orderId, 'to', newStatus);
+      } catch (error) {
+        console.error('Error updating order status:', error);
+        toast.error('Failed to update order status');
+      }
+    } else {
+      console.warn('onUpdateOrder function not provided');
+      toast.error('Order update function not available');
     }
   };
 
@@ -849,7 +977,10 @@ export const AdminPanel = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-black text-gray-900">Order Management</h2>
-                  <p className="text-gray-600">{orders.length} total orders • Total Revenue: Rs {orders.reduce((sum, order) => sum + order.total, 0).toLocaleString()}</p>
+                  <p className="text-gray-600">{(() => {
+                    const ordersToUse = localOrders.length > 0 ? localOrders : orders;
+                    return `${ordersToUse.length} total orders • Total Revenue: Rs ${ordersToUse.reduce((sum: number, order: any) => sum + (Number(order.total) || Number(order.total_amount) || 0), 0).toLocaleString()}`;
+                  })()}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   {/* View Toggle */}
@@ -916,7 +1047,8 @@ export const AdminPanel = ({
                 }}
               >
                 {(() => {
-                  const filteredOrders = filterOrders(orders);
+                  const ordersToUse = localOrders.length > 0 ? localOrders : orders;
+                  const filteredOrders = filterOrders(ordersToUse);
                   return filteredOrders.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -1007,7 +1139,8 @@ export const AdminPanel = ({
                 })()}
               </div>
             ) : (() => {
-              const filteredOrders = filterOrders(orders);
+              const ordersToUse = localOrders.length > 0 ? localOrders : orders;
+              const filteredOrders = filterOrders(ordersToUse);
               
               if (filteredOrders.length === 0) {
                 return (
@@ -1566,48 +1699,277 @@ export const AdminPanel = ({
               ))}
             </div>
           ) : (
-            // BANNERS SECTION
-            <div className="grid grid-cols-1 gap-6">
-              {banners.map(banner => (
-                <div 
-                  key={banner.id} 
-                  className="relative rounded-2xl overflow-hidden group aspect-[21/9] shadow-lg"
-                >
-                  <img 
-                    src={banner.image} 
-                    alt={banner.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center p-8">
-                    <div className="max-w-md text-white">
-                      <h3 className="text-3xl font-black mb-2">{banner.title}</h3>
-                      <p className="text-lg opacity-90 mb-4">{banner.subtitle}</p>
-                      <span className="px-4 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/30 font-bold text-sm">
-                        {banner.link}
-                      </span>
-                    </div>
+            // BANNERS SECTION - IMPROVED
+            <div className="space-y-6">
+              {/* Banner Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-white rounded-xl p-4 border border-gray-200">
+                  <div className="text-sm text-gray-500 font-medium mb-1">Total Banners</div>
+                  <div className="text-2xl font-black text-gray-900">{banners.length}</div>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                  <div className="text-sm text-purple-600 font-medium mb-1">Hero Banners</div>
+                  <div className="text-2xl font-black text-purple-700">
+                    {banners.filter(b => b.type === 'hero').length}
                   </div>
-                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
-                      onClick={() => {
-                        setSelectedBanner(banner);
-                        setShowEditBannerModal(true);
-                      }}
-                      className="p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white transition-colors"
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </button>
-                    <button 
-                      onClick={() => {
-                        if (window.confirm('Delete this banner?')) handleDeleteBanner(banner.id);
-                      }}
-                      className="p-2 rounded-xl bg-red-500/80 hover:bg-red-500 backdrop-blur-md text-white transition-colors"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                  <div className="text-xs text-purple-500 mt-1">
+                    {banners.filter(b => b.type === 'hero' && b.isActive).length} active
                   </div>
                 </div>
-              ))}
+                <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
+                  <div className="text-sm text-orange-600 font-medium mb-1">Promo Banners</div>
+                  <div className="text-2xl font-black text-orange-700">
+                    {banners.filter(b => b.type === 'promo').length}
+                  </div>
+                  <div className="text-xs text-orange-500 mt-1">
+                    {banners.filter(b => b.type === 'promo' && b.isActive).length} active
+                  </div>
+                </div>
+                <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                  <div className="text-sm text-green-600 font-medium mb-1">Active Banners</div>
+                  <div className="text-2xl font-black text-green-700">
+                    {banners.filter(b => b.isActive).length}
+                  </div>
+                  <div className="text-xs text-green-500 mt-1">
+                    {banners.filter(b => !b.isActive).length} inactive
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters and Search */}
+              <div className="flex flex-wrap gap-4 items-center">
+                {/* Search */}
+                <div className="flex-1 min-w-[200px] relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={bannerSearchQuery}
+                    onChange={(e) => setBannerSearchQuery(e.target.value)}
+                    placeholder="Search banners..."
+                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-purple-500 outline-none transition-all bg-white"
+                  />
+                </div>
+
+                {/* Type Filter */}
+                <div className="flex gap-2 p-1 rounded-xl bg-white border border-gray-200">
+                  <button
+                    onClick={() => setBannerFilterType('all')}
+                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                      bannerFilterType === 'all'
+                        ? 'bg-purple-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    All Types
+                  </button>
+                  <button
+                    onClick={() => setBannerFilterType('hero')}
+                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                      bannerFilterType === 'hero'
+                        ? 'bg-purple-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    Hero
+                  </button>
+                  <button
+                    onClick={() => setBannerFilterType('promo')}
+                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                      bannerFilterType === 'promo'
+                        ? 'bg-purple-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    Promo
+                  </button>
+                </div>
+
+                {/* Status Filter */}
+                <div className="flex gap-2 p-1 rounded-xl bg-white border border-gray-200">
+                  <button
+                    onClick={() => setBannerFilterStatus('all')}
+                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                      bannerFilterStatus === 'all'
+                        ? 'bg-green-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setBannerFilterStatus('active')}
+                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                      bannerFilterStatus === 'active'
+                        ? 'bg-green-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    Active
+                  </button>
+                  <button
+                    onClick={() => setBannerFilterStatus('inactive')}
+                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                      bannerFilterStatus === 'inactive'
+                        ? 'bg-gray-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    Inactive
+                  </button>
+                </div>
+              </div>
+
+              {/* Filtered Banners */}
+              {(() => {
+                const filteredBanners = banners
+                  .filter(banner => {
+                    // Type filter
+                    if (bannerFilterType !== 'all' && banner.type !== bannerFilterType) return false;
+                    // Status filter
+                    if (bannerFilterStatus === 'active' && !banner.isActive) return false;
+                    if (bannerFilterStatus === 'inactive' && banner.isActive) return false;
+                    // Search filter
+                    if (bannerSearchQuery) {
+                      const query = bannerSearchQuery.toLowerCase();
+                      return (
+                        banner.title?.toLowerCase().includes(query) ||
+                        banner.subtitle?.toLowerCase().includes(query) ||
+                        banner.description?.toLowerCase().includes(query)
+                      );
+                    }
+                    return true;
+                  })
+                  .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+
+                if (filteredBanners.length === 0) {
+                  return (
+                    <div className="text-center py-12 bg-white rounded-2xl border border-gray-200">
+                      <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500 font-bold text-lg">No banners found</p>
+                      <p className="text-gray-400 text-sm mt-2">Try adjusting your filters</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {filteredBanners.map(banner => (
+                      <div 
+                        key={banner.id} 
+                        className={`relative rounded-2xl overflow-hidden group shadow-lg transition-all ${
+                          !banner.isActive ? 'opacity-60 grayscale' : ''
+                        }`}
+                      >
+                        {/* Banner Image */}
+                        <div className="relative aspect-[21/9]">
+                          <img 
+                            src={banner.image} 
+                            alt={banner.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center p-6">
+                            <div className="max-w-md text-white">
+                              <h3 className="text-2xl font-black mb-1">{banner.title}</h3>
+                              {banner.subtitle && (
+                                <p className="text-lg opacity-90 mb-2">{banner.subtitle}</p>
+                              )}
+                              {banner.buttonText && (
+                                <span className="px-4 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/30 font-bold text-sm inline-block">
+                                  {banner.buttonText}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Banner Info Badge */}
+                          <div className="absolute top-4 left-4 flex flex-col gap-2">
+                            <span className={`px-3 py-1 rounded-lg text-xs font-bold backdrop-blur-md border ${
+                              banner.type === 'hero' 
+                                ? 'bg-purple-500/80 text-white border-purple-400/50' 
+                                : 'bg-orange-500/80 text-white border-orange-400/50'
+                            }`}>
+                              {banner.type === 'hero' ? '🏠 Hero' : '📢 Promo'}
+                            </span>
+                            <span className={`px-3 py-1 rounded-lg text-xs font-bold backdrop-blur-md border ${
+                              banner.isActive 
+                                ? 'bg-green-500/80 text-white border-green-400/50' 
+                                : 'bg-gray-500/80 text-white border-gray-400/50'
+                            }`}>
+                              {banner.isActive ? '✓ Active' : '✗ Inactive'}
+                            </span>
+                            {banner.displayOrder && (
+                              <span className="px-3 py-1 rounded-lg text-xs font-bold backdrop-blur-md bg-blue-500/80 text-white border border-blue-400/50">
+                                Order: {banner.displayOrder}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Display Location Info */}
+                          <div className="absolute bottom-4 left-4 right-4">
+                            <div className="bg-black/60 backdrop-blur-md rounded-lg p-3 border border-white/20">
+                              <p className="text-white text-xs font-bold mb-1">📍 Display Location:</p>
+                              <div className="flex flex-wrap gap-2">
+                                {banner.type === 'hero' ? (
+                                  <>
+                                    <span className="px-2 py-1 rounded bg-white/20 text-white text-xs font-bold">Mobile Home</span>
+                                    <span className="px-2 py-1 rounded bg-white/20 text-white text-xs font-bold">Desktop Home</span>
+                                  </>
+                                ) : (
+                                  <span className="px-2 py-1 rounded bg-white/20 text-white text-xs font-bold">Desktop Only</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                              onClick={() => setPreviewBanner(banner)}
+                              className="p-2 rounded-xl bg-blue-500/80 hover:bg-blue-500 backdrop-blur-md text-white transition-colors"
+                              title="Preview"
+                            >
+                              <Eye className="w-5 h-5" />
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setSelectedBanner(banner);
+                                setShowEditBannerModal(true);
+                              }}
+                              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white transition-colors"
+                              title="Edit"
+                            >
+                              <Edit2 className="w-5 h-5" />
+                            </button>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUpdateBanner(banner.id, { isActive: !banner.isActive });
+                              }}
+                              className={`p-2 rounded-xl backdrop-blur-md text-white transition-colors ${
+                                banner.isActive 
+                                  ? 'bg-green-500/80 hover:bg-green-500' 
+                                  : 'bg-gray-500/80 hover:bg-gray-500'
+                              }`}
+                              title={banner.isActive ? "Deactivate" : "Activate"}
+                            >
+                              {banner.isActive ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                            </button>
+                            <button 
+                              onClick={() => {
+                                if (window.confirm('Delete this banner?')) handleDeleteBanner(banner.id);
+                              }}
+                              className="p-2 rounded-xl bg-red-500/80 hover:bg-red-500 backdrop-blur-md text-white transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -1621,68 +1983,97 @@ export const AdminPanel = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex bg-[#F3F4F6]">
-      {/* Sidebar */}
-      <div className="w-72 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
-              <Settings className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="font-black text-xl text-gray-900 tracking-tight">Admin Panel</h1>
-              <p className="text-xs text-gray-500 font-medium">v2.0.0 • <span className="capitalize">{user?.user_metadata?.role || 'Admin'}</span></p>
-            </div>
+  const renderSidebarContent = () => (
+    <div className="flex flex-col h-full bg-white">
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+            <Settings className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="font-black text-xl text-gray-900 tracking-tight">Admin Panel</h1>
+            <p className="text-xs text-gray-500 font-medium">v2.0.0 • <span className="capitalize">{user?.user_metadata?.role || 'Admin'}</span></p>
           </div>
         </div>
-        
-        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeSection === item.id;
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id as AdminSection)}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all group ${
-                  isActive 
-                    ? 'bg-orange-50 text-orange-600 shadow-sm' 
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-orange-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
-                <span className={`font-bold ${isActive ? 'text-gray-900' : 'text-gray-600'}`}>{item.label}</span>
-                {isActive && (
-                  <motion.div 
-                    layoutId="active-indicator"
-                    className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-500"
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-        
-        <div className="p-4 border-t border-gray-100">
-          <button 
-            onClick={onClose}
-            className="w-full py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
-          >
-            <ArrowDown className="w-4 h-4 rotate-90" />
-            Exit to App
-          </button>
-        </div>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeSection === item.id;
+          
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id as AdminSection)}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all group ${
+                isActive 
+                  ? 'bg-orange-50 text-orange-600 shadow-sm' 
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-orange-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+              <span className={`font-bold ${isActive ? 'text-gray-900' : 'text-gray-600'}`}>{item.label}</span>
+              {isActive && (
+                <motion.div 
+                  layoutId="active-indicator"
+                  className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-500"
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+      
+      <div className="p-4 border-t border-gray-100">
+        <button 
+          onClick={onClose}
+          className="w-full py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+        >
+          <ArrowDown className="w-4 h-4 rotate-90" />
+          Exit to App
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex bg-[#F3F4F6]" 
+    >
+      {/* Sidebar - Desktop */}
+      <div 
+        className="hidden md:flex w-72 bg-white border-r border-gray-200 flex-col"
+        style={{ 
+          width: '18rem',
+          minWidth: '18rem',
+          maxWidth: '18rem',
+        }}
+      >
+        {renderSidebarContent()}
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden flex flex-col">
+      <div 
+        className="flex-1 overflow-hidden flex flex-col min-w-0"
+      >
         {/* Top Bar */}
         <header className="h-20 bg-white/80 backdrop-blur-xl border-b border-gray-200 px-8 flex items-center justify-between z-10">
-          <h2 className="text-2xl font-black text-gray-900 capitalize">
-            {menuItems.find(i => i.id === activeSection)?.label}
-          </h2>
+          <div className="flex items-center gap-4">
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="md:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                  <Menu className="w-6 h-6" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-72">
+                {renderSidebarContent()}
+              </SheetContent>
+            </Sheet>
+            <h2 className="text-2xl font-black text-gray-900 capitalize">
+              {menuItems.find(i => i.id === activeSection)?.label}
+            </h2>
+          </div>
           
           <div className="flex items-center gap-4">
             <button className="p-2.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors relative">
@@ -1793,6 +2184,278 @@ export const AdminPanel = ({
           }
         }}
       />
+
+      {/* Banner Preview Modal */}
+      {previewBanner && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="w-full max-w-4xl bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+          >
+            <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white flex justify-between items-center flex-shrink-0">
+              <div>
+                <h3 className="text-xl font-black text-gray-900">Banner Preview</h3>
+                <p className="text-sm text-gray-500">How this banner will appear to users</p>
+              </div>
+              <button 
+                onClick={() => setPreviewBanner(null)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6 overflow-y-auto flex-1 min-h-0">
+              {/* Helper functions for preview */}
+              {(() => {
+                const getButtonStyleClasses = (style: string = 'gradient') => {
+                  switch (style) {
+                    case 'solid':
+                      return 'bg-purple-500 text-white border-none';
+                    case 'outline':
+                      return 'bg-transparent text-white border-2 border-white';
+                    case 'gradient':
+                      return 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none';
+                    case 'ghost':
+                      return 'bg-white/10 backdrop-blur-md text-white border border-white/30';
+                    case 'rounded':
+                      return 'bg-purple-500 text-white border-none rounded-full';
+                    default:
+                      return 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none';
+                  }
+                };
+
+                const getTextPositionClasses = (position: string = 'left') => {
+                  switch (position) {
+                    case 'left':
+                      return 'text-left items-start';
+                    case 'center':
+                      return 'text-center items-center';
+                    case 'right':
+                      return 'text-right items-end';
+                  }
+                };
+
+                const getAnimationVariants = (type: string = 'fade') => {
+                  switch (type) {
+                    case 'fade':
+                      return { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } };
+                    case 'slide':
+                      return { initial: { opacity: 0, x: -50 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: 50 } };
+                    case 'zoom':
+                      return { initial: { opacity: 0, scale: 0.8 }, animate: { opacity: 1, scale: 1 }, exit: { opacity: 0, scale: 1.2 } };
+                    default:
+                      return { initial: { opacity: 1 }, animate: { opacity: 1 }, exit: { opacity: 1 } };
+                  }
+                };
+
+                const displayStyle = previewBanner.displayStyle || 'image-text-button';
+                const animationType = previewBanner.animationType || 'fade';
+                const buttonStyle = previewBanner.buttonStyle || 'gradient';
+                const textPosition = previewBanner.textPosition || 'left';
+                const overlayOpacity = previewBanner.overlayOpacity ?? 70;
+                const animationVariants = getAnimationVariants(animationType);
+
+                return (
+                  <>
+                    {/* Mobile Preview */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm font-bold text-gray-700">📱 Mobile View</span>
+                        {previewBanner.type === 'hero' && previewBanner.isActive && (
+                          <span className="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-bold">Will Display</span>
+                        )}
+                        {previewBanner.type === 'promo' && (
+                          <span className="px-2 py-1 rounded bg-gray-100 text-gray-700 text-xs font-bold">Not on Mobile</span>
+                        )}
+                      </div>
+                      <motion.div 
+                        className="relative rounded-2xl overflow-hidden border-4 border-gray-200" 
+                        style={{ maxWidth: '375px', height: '200px' }}
+                        {...animationVariants}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <img 
+                          src={previewBanner.image} 
+                          alt={previewBanner.title}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Overlay - only show if text is displayed */}
+                        {(displayStyle === 'image-text' || displayStyle === 'image-text-button') && (
+                          <div 
+                            className={`absolute inset-0 flex flex-col justify-center p-4 ${getTextPositionClasses(textPosition)}`}
+                            style={{
+                              background: `linear-gradient(to right, rgba(0,0,0,${overlayOpacity / 100}) 0%, rgba(0,0,0,${overlayOpacity / 200}) 100%)`,
+                            }}
+                          >
+                            <div className="text-white">
+                              {previewBanner.title && (
+                                <h4 className="text-lg font-black mb-1">{previewBanner.title}</h4>
+                              )}
+                              {previewBanner.subtitle && (
+                                <p className="text-sm opacity-90 mb-2">{previewBanner.subtitle}</p>
+                              )}
+                              {previewBanner.description && (
+                                <p className="text-xs opacity-80 mb-2">{previewBanner.description}</p>
+                              )}
+                              {displayStyle === 'image-text-button' && previewBanner.buttonText && (
+                                <span className={`px-3 py-1 text-xs font-bold ${
+                                  buttonStyle === 'rounded' ? 'rounded-full' : 'rounded-lg'
+                                } ${getButtonStyleClasses(buttonStyle)}`}>
+                                  {previewBanner.buttonText}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    </div>
+
+                    {/* Desktop Preview */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm font-bold text-gray-700">🖥️ Desktop View</span>
+                        {previewBanner.isActive && (
+                          <span className="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-bold">Will Display</span>
+                        )}
+                        {!previewBanner.isActive && (
+                          <span className="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-bold">Inactive - Won't Display</span>
+                        )}
+                      </div>
+                      <motion.div 
+                        className="relative rounded-2xl overflow-hidden border-4 border-gray-200" 
+                        style={{ height: '300px' }}
+                        {...animationVariants}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <img 
+                          src={previewBanner.image} 
+                          alt={previewBanner.title}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Overlay - only show if text is displayed */}
+                        {(displayStyle === 'image-text' || displayStyle === 'image-text-button') && (
+                          <div 
+                            className={`absolute inset-0 flex flex-col justify-center p-8 ${getTextPositionClasses(textPosition)}`}
+                            style={{
+                              background: `linear-gradient(to right, rgba(0,0,0,${overlayOpacity / 100}) 0%, rgba(0,0,0,${overlayOpacity / 200}) 100%)`,
+                            }}
+                          >
+                            <div className="max-w-md text-white">
+                              {previewBanner.title && (
+                                <h4 className="text-4xl font-black mb-2">{previewBanner.title}</h4>
+                              )}
+                              {previewBanner.subtitle && (
+                                <p className="text-xl opacity-90 mb-4">{previewBanner.subtitle}</p>
+                              )}
+                              {previewBanner.description && (
+                                <p className="text-lg opacity-80 mb-4">{previewBanner.description}</p>
+                              )}
+                              {displayStyle === 'image-text-button' && previewBanner.buttonText && (
+                                <span className={`px-6 py-3 font-bold ${
+                                  buttonStyle === 'rounded' ? 'rounded-full' : 'rounded-lg'
+                                } ${getButtonStyleClasses(buttonStyle)}`}>
+                                  {previewBanner.buttonText}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    </div>
+                  </>
+                );
+              })()}
+
+              {/* Banner Details */}
+              <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500 font-medium">Type:</span>
+                    <span className="ml-2 font-bold text-gray-900 capitalize">{previewBanner.type}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-medium">Status:</span>
+                    <span className={`ml-2 font-bold ${previewBanner.isActive ? 'text-green-600' : 'text-gray-500'}`}>
+                      {previewBanner.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-medium">Display Style:</span>
+                    <span className="ml-2 font-bold text-gray-900">
+                      {previewBanner.displayStyle === 'image-only' ? '🖼️ Image Only' : 
+                       previewBanner.displayStyle === 'image-text' ? '📝 Image+Text' : 
+                       '✨ Full Featured'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-medium">Animation:</span>
+                    <span className="ml-2 font-bold text-gray-900 capitalize">
+                      {previewBanner.animationType || 'Fade'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-medium">Display Order:</span>
+                    <span className="ml-2 font-bold text-gray-900">{previewBanner.displayOrder || 'Not set'}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-medium">Location:</span>
+                    <span className="ml-2 font-bold text-gray-900">
+                      {previewBanner.type === 'hero' ? 'Home Page (All)' : 'Desktop Only'}
+                    </span>
+                  </div>
+                  {(previewBanner.displayStyle === 'image-text' || previewBanner.displayStyle === 'image-text-button') && (
+                    <>
+                      <div>
+                        <span className="text-gray-500 font-medium">Text Position:</span>
+                        <span className="ml-2 font-bold text-gray-900 capitalize">
+                          {previewBanner.textPosition || 'Left'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 font-medium">Overlay Opacity:</span>
+                        <span className="ml-2 font-bold text-gray-900">
+                          {previewBanner.overlayOpacity || 70}%
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  {previewBanner.displayStyle === 'image-text-button' && (
+                    <div>
+                      <span className="text-gray-500 font-medium">Button Style:</span>
+                      <span className="ml-2 font-bold text-gray-900 capitalize">
+                        {previewBanner.buttonStyle || 'Gradient'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 bg-gray-50 flex justify-end gap-3 flex-shrink-0">
+              <button
+                onClick={() => {
+                  setSelectedBanner(previewBanner);
+                  setPreviewBanner(null);
+                  setShowEditBannerModal(true);
+                }}
+                className="px-6 py-3 rounded-xl font-bold bg-purple-500 text-white hover:bg-purple-600 transition-all flex items-center gap-2 z-10"
+              >
+                <Edit2 className="w-5 h-5" />
+                Edit Banner
+              </button>
+              <button
+                onClick={() => setPreviewBanner(null)}
+                className="px-6 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition-all z-10"
+              >
+                Close
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

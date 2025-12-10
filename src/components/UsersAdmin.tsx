@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, User, Phone, Mail, Calendar, Clock, Loader, RefreshCw, Download, Filter, Shield, Plus, X, Save } from 'lucide-react';
-import { projectId, publicAnonKey } from '../utils/supabase/info';
-import { toast } from 'sonner@2.0.3';
+import { getProjectId, getPublicAnonKey, getFunctionUrl } from '../config/supabase';
+import { toast } from 'sonner';
 
 interface UserData {
   id: string;
@@ -40,10 +40,10 @@ export const UsersAdmin = ({ currentUserRole = 'admin' }: UsersAdminProps) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-b09ae082/users`,
+        getFunctionUrl('make-server-b09ae082/users'),
         {
           headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
+            'Authorization': `Bearer ${getPublicAnonKey()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -80,11 +80,11 @@ export const UsersAdmin = ({ currentUserRole = 'admin' }: UsersAdminProps) => {
     setCreatingUser(true);
     try {
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-b09ae082/signup`,
+        getFunctionUrl('make-server-b09ae082/signup'),
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
+            'Authorization': `Bearer ${getPublicAnonKey()}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(newUser)

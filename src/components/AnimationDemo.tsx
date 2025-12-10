@@ -10,18 +10,24 @@ const demoProducts = [
     name: "Delicious Burger",
     price: 12.99,
     image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",
+    rating: 4.5,
+    isFavorite: false,
   },
   {
     id: "demo-pizza",
     name: "Pizza Slice",
     price: 8.99,
     image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400",
+    rating: 4.8,
+    isFavorite: false,
   },
   {
     id: "demo-fries",
     name: "French Fries",
     price: 4.99,
     image: "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=400",
+    rating: 4.2,
+    isFavorite: false,
   },
 ];
 

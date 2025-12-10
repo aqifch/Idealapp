@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
 import { X, Package, Clock, CheckCircle, Truck, XCircle, ChevronRight } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 interface OrdersSidebarProps {
   isOpen: boolean;

@@ -6,7 +6,7 @@ import { ShoppingCart, Plus, Minus, Heart } from "lucide-react";
 import { useAddToCart } from "../hooks/useAddToCart";
 import { useCart } from "../context/CartContext";
 
-interface HomeProductCardProps {
+interface HomeProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   product: Product;
   onClick?: () => void;
   isPopular?: boolean;
@@ -14,7 +14,7 @@ interface HomeProductCardProps {
   onAddToWishlist?: (product: Product) => void;
 }
 
-export const HomeProductCard = ({ product, onClick, isPopular, isInWishlist = false, onAddToWishlist }: HomeProductCardProps) => {
+export const HomeProductCard: React.FC<HomeProductCardProps> = ({ product, onClick, isPopular, isInWishlist = false, onAddToWishlist }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const { handleAddToCart } = useAddToCart("playful", "bounce");
   const { cartItems, updateQuantity } = useCart();

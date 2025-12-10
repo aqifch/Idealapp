@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, MapPin, Home, Briefcase, Plus, Edit2, Trash2, Check, Phone, Star } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 interface SavedAddressesViewProps {
   onBack: () => void;

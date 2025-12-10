@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Zap, Clock, Copy, Check } from "lucide-react";
 import { Deal } from "../data/mockData";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 interface FlashSaleCardProps {
   deal?: Deal;

@@ -10,10 +10,10 @@ interface NewBottomNavProps {
 
 export const NewBottomNav = ({ activeView, onViewChange, cartCount = 0 }: NewBottomNavProps) => {
   const navItems = [
-    { id: "home", icon: Home, label: "Home" },
-    { id: "products", icon: Grid3x3, label: "Menu" },
-    { id: "orders", icon: ShoppingBag, label: "Orders" },
-    { id: "account", icon: User, label: "Profile" },
+    { id: "home", path: "/", icon: Home, label: "Home" },
+    { id: "products", path: "/products", icon: Grid3x3, label: "Menu" },
+    { id: "orders", path: "/orders", icon: ShoppingBag, label: "Orders" },
+    { id: "account", path: "/account", icon: User, label: "Profile" },
   ];
 
   return (
@@ -29,7 +29,7 @@ export const NewBottomNav = ({ activeView, onViewChange, cartCount = 0 }: NewBot
         <div className="flex items-center justify-around">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeView === item.id;
+            const isActive = activeView === item.path || (item.path === "/" && activeView === "/");
 
             return (
               <motion.button

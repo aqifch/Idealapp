@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bell, Plus, Send, Trash, Edit2, Eye, Package, Gift, ShoppingCart, Star, X, Save, AlertCircle, Image as ImageIcon, Tag } from 'lucide-react';
-import { projectId, publicAnonKey } from '../utils/supabase/info';
-import { toast } from 'sonner@2.0.3';
+import { Bell, Plus, Send, Trash, Edit2, Eye, Package, Gift, ShoppingCart, Star, X, Save, AlertCircle, Image as ImageIcon, Tag, Zap, Megaphone, FileText } from 'lucide-react';
+import { getProjectId, getPublicAnonKey, getFunctionUrl } from '../config/supabase';
+import { toast } from 'sonner';
 import { localNotifications } from '../utils/localNotifications';
 import { Product, Deal } from '../data/mockData';
+import { NotificationAutomationAdmin } from './NotificationAutomationAdmin';
+import { NotificationCampaignsAdmin } from './NotificationCampaignsAdmin';
+import { NotificationTemplatesAdmin } from './NotificationTemplatesAdmin';
 
 interface Notification {
   id: string;
@@ -43,6 +46,7 @@ interface NotificationsAdminProps {
 }
 
 export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsAdminProps) => {
+  const [activeTab, setActiveTab] = useState<'manual' | 'automations' | 'campaigns' | 'templates'>('manual');
   const [notifications, setNotifications] = useState<Notification[]>(() => {
     return localNotifications.getAll().sort((a, b) => 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -72,10 +76,10 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
   const fetchNotifications = async () => {
     try {
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-b09ae082/notifications`,
+        getFunctionUrl('make-server-b09ae082/notifications'),
         {
           headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
+            'Authorization': `Bearer ${getPublicAnonKey()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -126,10 +130,10 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
       }
       
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-b09ae082/notifications/stats`,
+        getFunctionUrl('make-server-b09ae082/notifications/stats'),
         {
           headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
+            'Authorization': `Bearer ${getPublicAnonKey()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -197,8 +201,8 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
       }
       
       const endpoint = isBroadcast
-        ? `https://${projectId}.supabase.co/functions/v1/make-server-b09ae082/notifications/broadcast`
-        : `https://${projectId}.supabase.co/functions/v1/make-server-b09ae082/notifications`;
+        ? getFunctionUrl('make-server-b09ae082/notifications/broadcast')
+        : getFunctionUrl('make-server-b09ae082/notifications');
 
       console.log('📤 Creating notification:', {
         endpoint,
@@ -275,11 +279,11 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
       }
       
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-b09ae082/notifications/${id}`,
+        getFunctionUrl(`make-server-b09ae082/notifications/${id}`),
         {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
+            'Authorization': `Bearer ${getPublicAnonKey()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -336,18 +340,82 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black text-gray-900">Notification Management</h2>
-          <p className="text-gray-600 mt-1">Send real-time notifications to your users</p>
+          <p className="text-gray-600 mt-1">Complete notification system with automation and campaigns</p>
         </div>
-        <motion.button
-          onClick={() => setShowCreateModal(true)}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-500/30"
-        >
-          <Plus className="w-5 h-5" />
-          New Notification
-        </motion.button>
+        {activeTab === 'manual' && (
+          <motion.button
+            onClick={() => setShowCreateModal(true)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-500/30"
+          >
+            <Plus className="w-5 h-5" />
+            New Notification
+          </motion.button>
+        )}
       </div>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-xl border border-gray-200 p-1">
+        <div className="flex items-center gap-2">
+          <motion.button
+            onClick={() => setActiveTab('manual')}
+            className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 ${
+              activeTab === 'manual'
+                ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+            whileHover={{ scale: activeTab === 'manual' ? 1 : 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Bell className="w-5 h-5" />
+            Manual
+          </motion.button>
+          <motion.button
+            onClick={() => setActiveTab('automations')}
+            className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 ${
+              activeTab === 'automations'
+                ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+            whileHover={{ scale: activeTab === 'automations' ? 1 : 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Zap className="w-5 h-5" />
+            Automations
+          </motion.button>
+          <motion.button
+            onClick={() => setActiveTab('campaigns')}
+            className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 ${
+              activeTab === 'campaigns'
+                ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+            whileHover={{ scale: activeTab === 'campaigns' ? 1 : 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Megaphone className="w-5 h-5" />
+            Campaigns
+          </motion.button>
+          <motion.button
+            onClick={() => setActiveTab('templates')}
+            className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 ${
+              activeTab === 'templates'
+                ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+            whileHover={{ scale: activeTab === 'templates' ? 1 : 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <FileText className="w-5 h-5" />
+            Templates
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'manual' && (
+        <>
 
       {/* Stats Cards */}
       {stats && (
@@ -779,6 +847,20 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
           </>
         )}
       </AnimatePresence>
+        </>
+      )}
+
+      {activeTab === 'automations' && (
+        <NotificationAutomationAdmin />
+      )}
+
+      {activeTab === 'campaigns' && (
+        <NotificationCampaignsAdmin />
+      )}
+
+      {activeTab === 'templates' && (
+        <NotificationTemplatesAdmin />
+      )}
     </div>
   );
 };

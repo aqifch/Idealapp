@@ -18,7 +18,7 @@ import {
   Edit2,
   Package
 } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -42,8 +42,8 @@ export const AccountView = ({
   onNavigateToAddresses,
   onLogout,
   onNavigateToLogin,
-  orderCount = 12,
-  wishlistCount = 5,
+  orderCount = 0,
+  wishlistCount = 0,
   user,
   storeSettings
 }: AccountViewProps) => {

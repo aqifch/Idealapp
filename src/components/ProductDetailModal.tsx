@@ -3,7 +3,7 @@ import { ArrowLeft, Star, Heart, Plus, Minus, Clock, Flame, Users, ShoppingCart,
 import { Product, ProductSize } from "../data/mockData";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { motion, AnimatePresence } from "motion/react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 import { useAddToCart } from "../hooks/useAddToCart";
 

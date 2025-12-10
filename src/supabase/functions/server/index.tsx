@@ -26,39 +26,60 @@ app.use(
 
 // Get store settings
 app.get("/make-server-b09ae082/settings", async (c) => {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:GET/settings:entry',message:'GET settings endpoint called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+  // #endregion
   try {
     console.log("📡 Fetching store settings...");
     
+    // Default settings
+    const defaultSettings = {
+      storeName: "IDEAL POINT",
+      tagline: "Fast Food",
+      email: "admin@idealpoint.com",
+      phone: "+92 300 1234567",
+      address: "123 Main Street, Karachi, Pakistan",
+      currency: "PKR",
+      deliveryFee: 150,
+      taxRate: 0,
+      minOrder: 500,
+      openingTime: "10:00",
+      closingTime: "23:00",
+      isStoreOpen: true,
+      enableNotifications: true,
+      autoAcceptOrders: false,
+      bannerLayout: 'single',
+      bannerHeight: 500,
+      bannerPadding: 12
+    };
+    
     let settings = {};
     try {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:GET/settings:beforeKV',message:'Before KV get',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
       settings = await kv.get("store_settings");
-    } catch (kvError) {
-      console.error("❌ KV store error:", kvError);
-    }
-    
-    // Default settings if not found
-    if (!settings) {
-      settings = {
-        storeName: "IDEAL POINT",
-        tagline: "Fast Food",
-        email: "admin@idealpoint.com",
-        phone: "+92 300 1234567",
-        address: "123 Main Street, Karachi, Pakistan",
-        currency: "PKR",
-        deliveryFee: 150,
-        taxRate: 0,
-        minOrder: 500,
-        openingTime: "10:00",
-        closingTime: "23:00",
-        isStoreOpen: true,
-        enableNotifications: true,
-        autoAcceptOrders: false,
-        bannerLayout: 'single',
-        bannerHeight: 500,
-        bannerPadding: 12
-      };
-      // Save defaults
-      await kv.set("store_settings", settings);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:GET/settings:afterKV',message:'After KV get',data:{hasSettings:!!settings},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      if (!settings) {
+        settings = defaultSettings;
+        // Try to save defaults, but don't fail if KV store is unavailable
+        try {
+          await kv.set("store_settings", settings);
+        } catch (saveError: any) {
+          console.warn("⚠️ Could not save default settings to KV store:", saveError);
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:GET/settings:kvSetError',message:'KV set error in settings',data:{errorMessage:saveError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+          // #endregion
+        }
+      }
+    } catch (kvError: any) {
+      console.warn("⚠️ KV store unavailable, using default settings:", kvError?.message || String(kvError));
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:GET/settings:kvGetError',message:'KV get error in settings',data:{errorMessage:kvError?.message,errorCode:kvError?.code},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      settings = defaultSettings;
     }
     
     return c.json({
@@ -81,7 +102,18 @@ app.post("/make-server-b09ae082/settings", async (c) => {
     const body = await c.req.json();
     console.log("📝 Updating store settings:", body);
     
-    await kv.set("store_settings", body);
+    try {
+      await kv.set("store_settings", body);
+    } catch (kvError: any) {
+      // If KV store is unavailable, still return success but log warning
+      console.warn("⚠️ KV store unavailable, settings not persisted:", kvError?.message || String(kvError));
+      return c.json({
+        success: true,
+        settings: body,
+        message: "Settings updated (not persisted - KV store unavailable)",
+        warning: "KV store unavailable, settings will not persist"
+      });
+    }
     
     return c.json({
       success: true,
@@ -196,19 +228,50 @@ app.get("/make-server-b09ae082/notifications", async (c) => {
     console.log("📡 Fetching all notifications...");
     console.log("🔄 Server handling request for notifications");
     
+    // Try to get notifications from Supabase notifications table first (more reliable)
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+    );
+    
     let notifications = [];
-    try {
-      notifications = await kv.getByPrefix("notification:");
-      console.log(`📦 Retrieved ${notifications?.length || 0} notifications from KV store`);
-    } catch (kvError) {
-      console.error("❌ KV store error:", kvError);
-      // Return empty array if KV fails
+    
+    // Use Supabase notifications table (no KV store fallback)
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .order("created_at", { ascending: false });
+    
+    if (error) {
+      console.error("❌ Supabase fetch error:", error);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:GET/notifications:supabaseError',message:'Supabase fetch error in GET notifications',data:{errorMessage:error.message,errorCode:error.code,errorDetails:error.details},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
       return c.json({
-        success: true,
-        notifications: [],
-        count: 0,
-        warning: "KV store unavailable"
-      });
+        success: false,
+        error: "Failed to fetch notifications",
+        details: error.message
+      }, 500);
+    }
+    
+    if (data) {
+      // Map Supabase notifications to expected format
+      notifications = data.map((n: any) => ({
+        id: `notification:${n.id}`,
+        type: n.type,
+        title: n.title,
+        message: n.message,
+        targetUserId: n.target_user_id || "all",
+        timestamp: n.created_at,
+        isNew: !n.is_read,
+        isRead: n.is_read || false,
+        actionUrl: n.action_url,
+        imageUrl: n.image_url,
+        productId: n.product_id,
+        dealId: n.deal_id,
+        createdBy: "admin"
+      }));
+      console.log(`📦 Retrieved ${notifications.length} notifications from Supabase`);
     }
     
     // Sort by timestamp (newest first) with safety check
@@ -242,44 +305,47 @@ app.get("/make-server-b09ae082/notifications/:userId", async (c) => {
     const userId = c.req.param("userId");
     console.log(`📡 Fetching notifications for user: ${userId}`);
     
-    // Get all notifications
-    let allNotifications = [];
-    try {
-      allNotifications = await kv.getByPrefix("notification:");
-      console.log(`📦 Retrieved ${allNotifications?.length || 0} notifications from KV store`);
-    } catch (kvError) {
-      console.error("❌ KV store error:", kvError);
-      // Return empty array if KV fails
-      return c.json({
-        success: true,
-        notifications: [],
-        count: 0,
-        warning: "KV store unavailable"
-      });
-    }
-    
-    // Filter notifications for this user or global notifications
-    const userNotifications = (allNotifications || []).filter(notif => 
-      notif?.targetUserId === userId || 
-      notif?.targetUserId === "all" ||
-      !notif?.targetUserId
+    // Use Supabase notifications table directly (KV store not available)
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
     );
     
-    console.log(`🔍 Filtered to ${userNotifications.length} notifications for this user`);
+    // Fetch notifications for this user or broadcast notifications
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .or(`target_user_id.eq.${userId},is_broadcast.eq.true`)
+      .order("created_at", { ascending: false });
     
-    // Sort by timestamp (newest first) with safety check
-    const sortedNotifications = userNotifications.sort((a, b) => {
-      const aTime = a?.timestamp ? new Date(a.timestamp).getTime() : 0;
-      const bTime = b?.timestamp ? new Date(b.timestamp).getTime() : 0;
-      return bTime - aTime;
-    });
+    if (error) {
+      console.error("❌ Supabase fetch error:", error);
+      throw error;
+    }
     
-    console.log(`✅ Returning ${sortedNotifications.length} sorted notifications for user: ${userId}`);
+    // Map Supabase notifications to expected format
+    const notifications = (data || []).map((n: any) => ({
+      id: `notification:${n.id}`,
+      type: n.type,
+      title: n.title,
+      message: n.message,
+      targetUserId: n.target_user_id || "all",
+      timestamp: n.created_at,
+      isNew: !n.is_read,
+      isRead: n.is_read || false,
+      actionUrl: n.action_url,
+      imageUrl: n.image_url,
+      productId: n.product_id,
+      dealId: n.deal_id,
+      createdBy: "admin"
+    }));
+    
+    console.log(`✅ Retrieved ${notifications.length} notifications from Supabase for user: ${userId}`);
     
     return c.json({
       success: true,
-      notifications: sortedNotifications,
-      count: sortedNotifications.length
+      notifications: notifications,
+      count: notifications.length
     });
   } catch (error) {
     console.error(`❌ Error fetching notifications for user ${c.req.param("userId")}:`, error);
@@ -294,16 +360,25 @@ app.get("/make-server-b09ae082/notifications/:userId", async (c) => {
 
 // Create new notification
 app.post("/make-server-b09ae082/notifications", async (c) => {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:POST/notifications:entry',message:'POST notifications endpoint called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
   try {
     console.log("📥 Received POST request to create notification");
     
     const body = await c.req.json();
     console.log("📦 Request body:", body);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:POST/notifications:body',message:'Request body parsed',data:{type:body.type,title:body.title,hasMessage:!!body.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     
     const { type, title, message, targetUserId, actionUrl, icon, imageUrl, productId, dealId } = body;
     
     if (!type || !title || !message) {
       console.error("❌ Missing required fields:", { type, title, message });
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:POST/notifications:validation',message:'Validation failed',data:{type,title,hasMessage:!!message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       return c.json({ 
         success: false, 
         error: "Missing required fields: type, title, message" 
@@ -330,19 +405,73 @@ app.post("/make-server-b09ae082/notifications", async (c) => {
       createdBy: "admin"
     };
     
-    console.log("💾 Saving notification to KV store...");
-    await kv.set(notificationId, notification);
+    // Use Supabase notifications table directly (KV store not available)
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+    );
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:POST/notifications:beforeInsert',message:'Before Supabase insert',data:{type,title,targetUserId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     
-    console.log(`✅ Notification created successfully: ${notificationId}`);
+    const { data, error } = await supabase
+      .from("notifications")
+      .insert({
+        type: type,
+        title: title,
+        message: message,
+        target_user_id: targetUserId && targetUserId !== "all" ? targetUserId : null,
+        is_broadcast: targetUserId === "all" || !targetUserId,
+        action_url: actionUrl || null,
+        image_url: imageUrl || null,
+        product_id: productId || null,
+        deal_id: dealId || null,
+        is_read: false,
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("❌ Supabase insert error:", error);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:POST/notifications:insertError',message:'Supabase insert error',data:{errorMessage:error.message,errorCode:error.code,errorDetails:error.details},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      throw error;
+    }
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:POST/notifications:insertSuccess',message:'Supabase insert success',data:{notificationId:data?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    
+    console.log(`✅ Notification saved to Supabase: ${data.id}`);
+    
+    // Map Supabase response to notification format
+    const mappedNotification = {
+      id: `notification:${data.id}`,
+      type: data.type,
+      title: data.title,
+      message: data.message,
+      targetUserId: data.target_user_id || "all",
+      timestamp: data.created_at,
+      isNew: !data.is_read,
+      isRead: data.is_read || false,
+      actionUrl: data.action_url,
+      imageUrl: data.image_url,
+      productId: data.product_id,
+      dealId: data.deal_id,
+      createdBy: "admin"
+    };
     
     return c.json({
       success: true,
-      notification,
+      notification: mappedNotification,
       message: "Notification created successfully"
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ Error creating notification:", error);
     console.error("❌ Error stack:", error?.stack);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.tsx:POST/notifications:catch',message:'Exception caught',data:{errorMessage:error?.message,errorStack:error?.stack,errorName:error?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     return c.json({ 
       success: false, 
       error: "Failed to create notification",
@@ -357,23 +486,56 @@ app.put("/make-server-b09ae082/notifications/:id", async (c) => {
     const notificationId = c.req.param("id");
     const updates = await c.req.json();
     
-    const existingNotifications = await kv.getByPrefix("notification:");
-    const existing = existingNotifications.find(n => n.id === notificationId);
+    // Use Supabase notifications table
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+    );
     
-    if (!existing) {
+    // Extract ID from notification: prefix if present
+    const dbId = notificationId.replace("notification:", "");
+    
+    const { data, error } = await supabase
+      .from("notifications")
+      .update({
+        title: updates.title,
+        message: updates.message,
+        type: updates.type,
+        action_url: updates.actionUrl || updates.action_url,
+        image_url: updates.imageUrl || updates.image_url,
+        is_read: updates.isRead !== undefined ? updates.isRead : updates.is_read,
+      })
+      .eq("id", dbId)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("❌ Supabase update error:", error);
+      throw error;
+    }
+    
+    if (!data) {
       return c.json({ 
         success: false, 
         error: "Notification not found" 
       }, 404);
     }
     
+    // Map response
     const updated = {
-      ...existing,
-      ...updates,
-      updatedAt: new Date().toISOString()
+      id: `notification:${data.id}`,
+      type: data.type,
+      title: data.title,
+      message: data.message,
+      targetUserId: data.target_user_id || "all",
+      timestamp: data.created_at,
+      isNew: !data.is_read,
+      isRead: data.is_read || false,
+      actionUrl: data.action_url,
+      imageUrl: data.image_url,
+      productId: data.product_id,
+      dealId: data.deal_id,
     };
-    
-    await kv.set(notificationId, updated);
     
     console.log(`✅ Notification updated: ${notificationId}`);
     
@@ -382,12 +544,12 @@ app.put("/make-server-b09ae082/notifications/:id", async (c) => {
       notification: updated,
       message: "Notification updated successfully"
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating notification:", error);
     return c.json({ 
       success: false, 
       error: "Failed to update notification",
-      details: error.message 
+      details: error?.message || String(error)
     }, 500);
   }
 });
@@ -397,35 +559,60 @@ app.patch("/make-server-b09ae082/notifications/:id/read", async (c) => {
   try {
     const notificationId = c.req.param("id");
     
-    const existingNotifications = await kv.getByPrefix("notification:");
-    const existing = existingNotifications.find(n => n.id === notificationId);
+    // Use Supabase notifications table
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+    );
     
-    if (!existing) {
+    // Extract ID from notification: prefix if present
+    const dbId = notificationId.replace("notification:", "");
+    
+    const { data, error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("id", dbId)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("❌ Supabase update error:", error);
+      throw error;
+    }
+    
+    if (!data) {
       return c.json({ 
         success: false, 
         error: "Notification not found" 
       }, 404);
     }
     
+    // Map response
     const updated = {
-      ...existing,
+      id: `notification:${data.id}`,
+      type: data.type,
+      title: data.title,
+      message: data.message,
+      targetUserId: data.target_user_id || "all",
+      timestamp: data.created_at,
       isNew: false,
       isRead: true,
-      readAt: new Date().toISOString()
+      actionUrl: data.action_url,
+      imageUrl: data.image_url,
+      productId: data.product_id,
+      dealId: data.deal_id,
     };
-    
-    await kv.set(notificationId, updated);
     
     return c.json({
       success: true,
       notification: updated
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error marking notification as read:", error);
     return c.json({ 
       success: false, 
       error: "Failed to mark notification as read",
-      details: error.message 
+      details: error?.message || String(error)
     }, 500);
   }
 });
@@ -435,41 +622,38 @@ app.patch("/make-server-b09ae082/notifications/user/:userId/read-all", async (c)
   try {
     const userId = c.req.param("userId");
     
-    const allNotifications = await kv.getByPrefix("notification:");
-    
-    // Filter user notifications
-    const userNotifications = allNotifications.filter(notif => 
-      notif.targetUserId === userId || 
-      notif.targetUserId === "all" ||
-      !notif.targetUserId
+    // Use Supabase notifications table
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
     );
     
-    // Mark all as read
-    const updatePromises = userNotifications.map(notif => {
-      const updated = {
-        ...notif,
-        isNew: false,
-        isRead: true,
-        readAt: new Date().toISOString()
-      };
-      return kv.set(notif.id, updated);
-    });
+    // Update all notifications for this user or broadcast notifications
+    const { data, error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .or(`target_user_id.eq.${userId},is_broadcast.eq.true`)
+      .select();
     
-    await Promise.all(updatePromises);
+    if (error) {
+      console.error("❌ Supabase update error:", error);
+      throw error;
+    }
     
-    console.log(`✅ Marked ${userNotifications.length} notifications as read for user ${userId}`);
+    const count = data?.length || 0;
+    console.log(`✅ Marked ${count} notifications as read for user ${userId}`);
     
     return c.json({
       success: true,
-      count: userNotifications.length,
+      count: count,
       message: "All notifications marked as read"
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error marking all notifications as read:", error);
     return c.json({ 
       success: false, 
       error: "Failed to mark notifications as read",
-      details: error.message 
+      details: error?.message || String(error)
     }, 500);
   }
 });
@@ -479,7 +663,24 @@ app.delete("/make-server-b09ae082/notifications/:id", async (c) => {
   try {
     const notificationId = c.req.param("id");
     
-    await kv.del(notificationId);
+    // Use Supabase notifications table
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+    );
+    
+    // Extract ID from notification: prefix if present
+    const dbId = notificationId.replace("notification:", "");
+    
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", dbId);
+    
+    if (error) {
+      console.error("❌ Supabase delete error:", error);
+      throw error;
+    }
     
     console.log(`✅ Notification deleted: ${notificationId}`);
     
@@ -487,12 +688,12 @@ app.delete("/make-server-b09ae082/notifications/:id", async (c) => {
       success: true,
       message: "Notification deleted successfully"
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting notification:", error);
     return c.json({ 
       success: false, 
       error: "Failed to delete notification",
-      details: error.message 
+      details: error?.message || String(error)
     }, 500);
   }
 });
@@ -502,32 +703,38 @@ app.delete("/make-server-b09ae082/notifications/user/:userId", async (c) => {
   try {
     const userId = c.req.param("userId");
     
-    const allNotifications = await kv.getByPrefix("notification:");
-    
-    // Filter user notifications
-    const userNotifications = allNotifications.filter(notif => 
-      notif.targetUserId === userId || 
-      notif.targetUserId === "all" ||
-      !notif.targetUserId
+    // Use Supabase notifications table
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
     );
     
-    // Delete all user notifications
-    const deletePromises = userNotifications.map(notif => kv.del(notif.id));
-    await Promise.all(deletePromises);
+    // Delete all notifications for this user or broadcast notifications
+    const { data, error } = await supabase
+      .from("notifications")
+      .delete()
+      .or(`target_user_id.eq.${userId},is_broadcast.eq.true`)
+      .select();
     
-    console.log(`✅ Deleted ${userNotifications.length} notifications for user ${userId}`);
+    if (error) {
+      console.error("❌ Supabase delete error:", error);
+      throw error;
+    }
+    
+    const count = data?.length || 0;
+    console.log(`✅ Deleted ${count} notifications for user ${userId}`);
     
     return c.json({
       success: true,
-      count: userNotifications.length,
+      count: count,
       message: "All notifications cleared"
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error clearing notifications:", error);
     return c.json({ 
       success: false, 
       error: "Failed to clear notifications",
-      details: error.message 
+      details: error?.message || String(error)
     }, 500);
   }
 });
@@ -550,38 +757,60 @@ app.post("/make-server-b09ae082/notifications/broadcast", async (c) => {
       }, 400);
     }
     
-    const notificationId = `notification:broadcast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    console.log("🆔 Generated broadcast ID:", notificationId);
+    // Use Supabase notifications table
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+    );
     
+    const { data, error } = await supabase
+      .from("notifications")
+      .insert({
+        type: type,
+        title: title,
+        message: message,
+        target_user_id: null,
+        is_broadcast: true,
+        action_url: actionUrl || null,
+        image_url: imageUrl || null,
+        product_id: productId || null,
+        deal_id: dealId || null,
+        is_read: false,
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("❌ Supabase insert error:", error);
+      throw error;
+    }
+    
+    // Map response
     const notification = {
-      id: notificationId,
-      type,
-      title,
-      message,
-      targetUserId: "all", // Broadcast to all users
-      timestamp: new Date().toISOString(),
+      id: `notification:${data.id}`,
+      type: data.type,
+      title: data.title,
+      message: data.message,
+      targetUserId: "all",
+      timestamp: data.created_at,
       isNew: true,
       isRead: false,
-      actionUrl: actionUrl || null,
-      icon: icon || null,
-      imageUrl: imageUrl || null,
-      productId: productId || null,
-      dealId: dealId || null,
+      actionUrl: data.action_url,
+      imageUrl: data.image_url,
+      productId: data.product_id,
+      dealId: data.deal_id,
       createdBy: "admin",
       isBroadcast: true
     };
     
-    console.log("💾 Saving broadcast notification to KV store...");
-    await kv.set(notificationId, notification);
-    
-    console.log(`✅ Broadcast notification created successfully: ${notificationId}`);
+    console.log(`✅ Broadcast notification created successfully: ${notification.id}`);
     
     return c.json({
       success: true,
       notification,
       message: "Broadcast notification sent to all users"
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ Error broadcasting notification:", error);
     console.error("❌ Error stack:", error?.stack);
     return c.json({ 
@@ -595,32 +824,47 @@ app.post("/make-server-b09ae082/notifications/broadcast", async (c) => {
 // Get notification statistics
 app.get("/make-server-b09ae082/notifications/stats", async (c) => {
   try {
-    const notifications = await kv.getByPrefix("notification:");
+    // Use Supabase notifications table
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+    );
+    
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*");
+    
+    if (error) {
+      console.error("❌ Supabase fetch error:", error);
+      throw error;
+    }
+    
+    const notifications = data || [];
     
     const stats = {
       total: notifications.length,
-      new: notifications.filter(n => n.isNew).length,
-      read: notifications.filter(n => n.isRead).length,
+      new: notifications.filter((n: any) => !n.is_read).length,
+      read: notifications.filter((n: any) => n.is_read).length,
       byType: {
-        order: notifications.filter(n => n.type === "order").length,
-        promo: notifications.filter(n => n.type === "promo").length,
-        reward: notifications.filter(n => n.type === "reward").length,
-        delivery: notifications.filter(n => n.type === "delivery").length,
-        system: notifications.filter(n => n.type === "system").length,
+        order: notifications.filter((n: any) => n.type === "order").length,
+        promo: notifications.filter((n: any) => n.type === "promo").length,
+        reward: notifications.filter((n: any) => n.type === "reward").length,
+        delivery: notifications.filter((n: any) => n.type === "delivery").length,
+        system: notifications.filter((n: any) => n.type === "system").length,
       },
-      broadcast: notifications.filter(n => n.isBroadcast).length,
+      broadcast: notifications.filter((n: any) => n.is_broadcast).length,
     };
     
     return c.json({
       success: true,
       stats
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching notification stats:", error);
     return c.json({ 
       success: false, 
       error: "Failed to fetch notification stats",
-      details: error.message 
+      details: error?.message || String(error)
     }, 500);
   }
 });

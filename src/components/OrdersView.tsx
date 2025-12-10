@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, Package, Clock, CheckCircle, XCircle, Truck, MapPin, Star, Phone, MessageCircle, HelpCircle, ChefHat } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 import { Product, ProductSize } from "../data/mockData";
 

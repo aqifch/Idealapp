@@ -19,23 +19,41 @@ const client = () => createClient(
 
 // Set stores a key-value pair in the database.
 export const set = async (key: string, value: any): Promise<void> => {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'kv_store.tsx:set:entry',message:'KV set called',data:{key},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
   const supabase = client()
   const { error } = await supabase.from("kv_store_b09ae082").upsert({
     key,
     value
   });
   if (error) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'kv_store.tsx:set:error',message:'KV set error',data:{key,errorMessage:error.message,errorCode:error.code,errorDetails:error.details},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
     throw new Error(error.message);
   }
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'kv_store.tsx:set:success',message:'KV set success',data:{key},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
 };
 
 // Get retrieves a key-value pair from the database.
 export const get = async (key: string): Promise<any> => {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'kv_store.tsx:get:entry',message:'KV get called',data:{key},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
   const supabase = client()
   const { data, error } = await supabase.from("kv_store_b09ae082").select("value").eq("key", key).maybeSingle();
   if (error) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'kv_store.tsx:get:error',message:'KV get error',data:{key,errorMessage:error.message,errorCode:error.code,errorDetails:error.details},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
     throw new Error(error.message);
   }
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'kv_store.tsx:get:success',message:'KV get success',data:{key,hasValue:!!data?.value},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
   return data?.value;
 };
 
@@ -78,10 +96,19 @@ export const mdel = async (keys: string[]): Promise<void> => {
 
 // Search for key-value pairs by prefix.
 export const getByPrefix = async (prefix: string): Promise<any[]> => {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'kv_store.tsx:getByPrefix:entry',message:'KV getByPrefix called',data:{prefix},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
   const supabase = client()
   const { data, error } = await supabase.from("kv_store_b09ae082").select("key, value").like("key", prefix + "%");
   if (error) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'kv_store.tsx:getByPrefix:error',message:'KV getByPrefix error',data:{prefix,errorMessage:error.message,errorCode:error.code,errorDetails:error.details},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
     throw new Error(error.message);
   }
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'kv_store.tsx:getByPrefix:success',message:'KV getByPrefix success',data:{prefix,count:data?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
   return data?.map((d) => d.value) ?? [];
 };

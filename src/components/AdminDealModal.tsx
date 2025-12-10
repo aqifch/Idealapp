@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Save, Calendar, Layout, List, Grid, Zap } from 'lucide-react';
 import { Deal, Product } from '../data/mockData';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface AdminDealModalProps {
   isOpen: boolean;

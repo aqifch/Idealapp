@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, MapPin, Wallet, CheckCircle, Package, Clock, Info, User, Plus, Home, Briefcase, Star, ArrowRight, Store, Bike } from "lucide-react";
 import { useCart } from "../context/CartContext";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { GoogleMapsAddressInput } from "./GoogleMapsAddressInput";
 import { MiniMapPreview } from "./MiniMapPreview";
 import { GoogleMapsSetupBanner } from "./GoogleMapsSetupBanner";
+import { triggerAutomation } from "../utils/notificationAutomation";
+import { supabase } from "../config/supabase";
+import { createOrder, Order } from "../utils/orders";
 
 interface CheckoutViewProps {
   onBack: () => void;
@@ -127,7 +130,7 @@ export const CheckoutView = ({ onBack, onSuccess, deliveryFee: propDeliveryFee =
     }
   ];
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!isStoreOpen) {
       toast.error("Sorry, the store is currently closed 🚫");
       return;
@@ -153,38 +156,72 @@ export const CheckoutView = ({ onBack, onSuccess, deliveryFee: propDeliveryFee =
       return;
     }
 
-    // Create Order Object
-    const newOrder = {
-      id: `ord-${Date.now()}`,
-      orderNumber: `#${Math.floor(100000 + Math.random() * 900000)}`,
-      date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
-      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      status: "pending",
-      items: cartItems,
-      subtotal,
-      deliveryFee,
-      tax: 0,
-      total,
-      deliveryAddress: orderType === "pickup" ? "Store Pickup" : deliveryAddress,
-      orderType,
-      customerName: name,
-      customerPhone: phoneNumber,
-      instructions
-    };
-
-    if (onAddOrder) {
-      onAddOrder(newOrder);
-    }
-
     setIsProcessing(true);
 
-    // Simulate order processing
-    setTimeout(() => {
+    try {
+      // Create Order Object
+      const newOrder: Order = {
+        id: `ord-${Date.now()}`,
+        orderNumber: `#${Math.floor(100000 + Math.random() * 900000)}`,
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        status: "pending",
+        items: cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image,
+          category: item.category,
+          customization: item.customization
+        })),
+        subtotal,
+        deliveryFee,
+        tax: 0,
+        total,
+        deliveryAddress: orderType === "pickup" ? "Store Pickup" : deliveryAddress,
+        orderType,
+        customerName: name,
+        customerPhone: phoneNumber,
+        instructions,
+        paymentMethod: selectedPayment,
+        paymentStatus: 'pending'
+      };
+
+      // Save order to Supabase database
+      const savedOrder = await createOrder(newOrder);
+      
+      // Use saved order if available, otherwise use original
+      const finalOrder = savedOrder || newOrder;
+
+      // Add to local state
+      if (onAddOrder) {
+        onAddOrder(finalOrder);
+      }
+
+      // Trigger order confirmation automation
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        await triggerAutomation('order_placed', {
+          orderNumber: finalOrder.orderNumber,
+          orderId: finalOrder.id,
+          total: finalOrder.total,
+          estimatedTime: '30-45 minutes',
+          customerName: name,
+        }, user?.id);
+      } catch (error) {
+        console.error('Error triggering order automation:', error);
+      }
+
       clearCart();
       setIsProcessing(false);
       toast.success("Order placed successfully! 🎉");
       if (onSuccess) onSuccess();
-    }, 2000);
+    } catch (error: any) {
+      console.error('Error placing order:', error);
+      setIsProcessing(false);
+      toast.error("Failed to place order. Please try again.");
+    }
   };
 
   const PlaceOrderButton = ({ isMobile = false }) => {

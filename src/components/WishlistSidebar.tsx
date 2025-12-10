@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { X, Heart, Trash2, ShoppingCart } from "lucide-react";
 import { Product } from "../data/mockData";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 interface WishlistSidebarProps {
   isOpen: boolean;

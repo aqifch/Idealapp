@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Home, UtensilsCrossed, Tag, User, ShoppingCart, Heart, Bell, ChevronDown, Package, MapPin, Lock, HelpCircle, FileText, LogOut, Shield, LogIn } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { NotificationPanel } from "./NotificationPanel";
 import { useNotifications } from "../context/NotificationContext";
@@ -60,8 +60,6 @@ export const DesktopNavBar = ({
       toast.success(`Welcome back, ${user?.user_metadata?.name || 'Staff'}! 🛡️`);
       onAdminAccess?.();
     } else {
-      // Fallback for manual password (legacy/emergency)
-      // Or simply deny. Let's keep it strict for now based on the prompt.
       toast.error("Unauthorized access");
     }
   };
@@ -127,18 +125,6 @@ export const DesktopNavBar = ({
 
         {/* Right Actions */}
         <div className="flex items-center gap-4">
-          {/* Admin Button - Only visible to authorized users */}
-          {hasAdminAccess && (
-            <motion.button
-              onClick={handleAdminAccess}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2.5 text-orange-500 hover:text-orange-600 transition-colors bg-orange-50 rounded-xl"
-              title="Admin Panel"
-            >
-              <Shield className="w-5 h-5" />
-            </motion.button>
-          )}
 
           {/* Notifications */}
           <motion.button

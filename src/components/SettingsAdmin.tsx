@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Save, Store, DollarSign, Clock, MapPin, Phone, Mail, Shield, Bell, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface SettingsAdminProps {
   settings?: any;

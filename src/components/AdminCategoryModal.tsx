@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Save } from 'lucide-react';
 import { Category } from '../data/mockData';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface AdminCategoryModalProps {
   isOpen: boolean;

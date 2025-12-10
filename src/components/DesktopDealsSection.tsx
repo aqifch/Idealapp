@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Deal } from "../data/mockData";
 import { Tag, Clock, Copy } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 interface DesktopDealsSectionProps {
   deals: Deal[];

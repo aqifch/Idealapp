@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { X, ChevronLeft, Minus, Plus, ShoppingCart, Ticket, Package, Trash2 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { Deal } from "../data/mockData";
 
 interface CartViewProps {

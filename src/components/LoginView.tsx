@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
 import { Mail, Lock, ArrowRight, Loader, Eye, EyeOff } from "lucide-react";
-import { supabase } from "../utils/supabase/client";
+import { supabase } from "../config/supabase";
 
 interface LoginViewProps {
   onNavigateToRegister: () => void;
