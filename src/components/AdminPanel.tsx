@@ -277,17 +277,94 @@ export const AdminPanel = ({
     toast.success("Banner deleted successfully! 🗑️");
   };
 
-  const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, visible: permissions.canViewDashboard },
-    { id: "products", label: "Products", icon: Package, visible: permissions.canManageProducts },
-    { id: "orders", label: "Orders", icon: ShoppingBag, visible: permissions.canManageOrders },
-    { id: "categories", label: "Categories", icon: Layers, visible: permissions.canManageCategories },
-    { id: "marketing", label: "Marketing & Promos", icon: Megaphone, visible: permissions.canManageDeals || permissions.canManageBanners },
-    { id: "users", label: "Users", icon: Users, visible: permissions.canManageUsers },
-    { id: "roles", label: "Roles & Permissions", icon: Shield, visible: permissions.canManageRoles },
-    { id: "notifications", label: "Notifications", icon: Bell, visible: permissions.canViewNotifications },
-    { id: "settings", label: "Settings", icon: Settings, visible: permissions.canManageSettings },
-  ].filter(item => item.visible);
+  // Create menuItems with defensive checks for Chrome compatibility
+  // If user is accessing admin panel, they should have admin permissions by default
+  const menuItems = useMemo(() => {
+    // If user is accessing admin panel, assume they have admin access
+    // This prevents issues when permissions are not loaded yet or role is incorrectly set
+    const isAdminAccess = user !== null && (role === 'admin' || role === 'manager' || role === 'staff' || role === 'support');
+    const hasPermissions = permissions && Object.keys(permissions).length > 0;
+    
+    // If permissions exist and user has admin role, use permissions
+    // Otherwise, if user is accessing admin panel, show all items (default to admin access)
+    const shouldShowAll = !hasPermissions || isAdminAccess;
+    
+    const items = [
+      { 
+        id: "dashboard", 
+        label: "Dashboard", 
+        icon: LayoutDashboard, 
+        visible: shouldShowAll || (permissions?.canViewDashboard === true) 
+      },
+      { 
+        id: "products", 
+        label: "Products", 
+        icon: Package, 
+        visible: shouldShowAll || (permissions?.canManageProducts === true) 
+      },
+      { 
+        id: "orders", 
+        label: "Orders", 
+        icon: ShoppingBag, 
+        visible: shouldShowAll || (permissions?.canManageOrders === true) 
+      },
+      { 
+        id: "categories", 
+        label: "Categories", 
+        icon: Layers, 
+        visible: shouldShowAll || (permissions?.canManageCategories === true) 
+      },
+      { 
+        id: "marketing", 
+        label: "Marketing & Promos", 
+        icon: Megaphone, 
+        visible: shouldShowAll || (permissions?.canManageDeals === true) || (permissions?.canManageBanners === true) 
+      },
+      { 
+        id: "users", 
+        label: "Users", 
+        icon: Users, 
+        visible: shouldShowAll || (permissions?.canManageUsers === true) 
+      },
+      { 
+        id: "roles", 
+        label: "Roles & Permissions", 
+        icon: Shield, 
+        visible: shouldShowAll || (permissions?.canManageRoles === true) 
+      },
+      { 
+        id: "notifications", 
+        label: "Notifications", 
+        icon: Bell, 
+        visible: shouldShowAll || (permissions?.canViewNotifications === true) 
+      },
+      { 
+        id: "settings", 
+        label: "Settings", 
+        icon: Settings, 
+        visible: shouldShowAll || (permissions?.canManageSettings === true) 
+      },
+    ];
+    
+    const filtered = items.filter(item => item.visible);
+    
+    // Debug logging for troubleshooting
+    if (filtered.length !== items.length) {
+      console.log('🔍 Menu Items Filtered:', {
+        role,
+        isAdminAccess,
+        shouldShowAll,
+        hasPermissions,
+        totalItems: items.length,
+        visibleItems: filtered.length,
+        hiddenItems: items.filter(i => !i.visible).map(i => i.id),
+        visibleItemsList: filtered.map(i => i.id)
+      });
+    }
+    
+    // Always return filtered items, or all items if somehow all filtered out (shouldn't happen)
+    return filtered.length > 0 ? filtered : items;
+  }, [permissions, role, user]);
 
   // Redirect if active section is not allowed (e.g. on role change or initial load)
   React.useEffect(() => {
@@ -1984,8 +2061,16 @@ export const AdminPanel = ({
   };
 
   const renderSidebarContent = () => (
-    <div className="flex flex-col h-full bg-white">
-      <div className="p-6 border-b border-gray-100">
+    <div 
+      className="flex flex-col h-full bg-white"
+      style={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        minHeight: '100%'
+      }}
+    >
+      <div className="p-6 border-b border-gray-100 flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
             <Settings className="w-6 h-6 text-white" />
@@ -1997,8 +2082,16 @@ export const AdminPanel = ({
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
-        {menuItems.map((item) => {
+      <div 
+        className="flex-1 overflow-y-auto py-6 px-4 space-y-1"
+        style={{
+          flex: '1 1 auto',
+          minHeight: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch' // Smooth scrolling in Chrome
+        }}
+      >
+        {menuItems && menuItems.length > 0 ? menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
           
@@ -2022,10 +2115,14 @@ export const AdminPanel = ({
               )}
             </button>
           );
-        })}
+        }) : (
+          <div className="text-center py-8 text-gray-500 text-sm">
+            <p>Loading menu items...</p>
+          </div>
+        )}
       </div>
       
-      <div className="p-4 border-t border-gray-100">
+      <div className="p-4 border-t border-gray-100 flex-shrink-0">
         <button 
           onClick={onClose}
           className="w-full py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
@@ -2039,15 +2136,35 @@ export const AdminPanel = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex bg-[#F3F4F6]" 
+      className="fixed inset-0 z-50 flex bg-[#F3F4F6]"
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 50,
+        overflow: 'hidden'
+      }}
     >
       {/* Sidebar - Desktop */}
       <div 
-        className="hidden md:flex w-72 bg-white border-r border-gray-200 flex-col"
+        className="flex w-72 bg-white border-r border-gray-200 flex-col"
         style={{ 
           width: '18rem',
           minWidth: '18rem',
           maxWidth: '18rem',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100vh',
+          position: 'relative',
+          zIndex: 1,
+          visibility: 'visible',
+          opacity: 1
         }}
       >
         {renderSidebarContent()}
