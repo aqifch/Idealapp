@@ -4,18 +4,18 @@ import { Product, Category, Deal, Banner } from "../data/mockData";
 import { User } from "@supabase/supabase-js";
 
 // Components
-import { CartView } from "../components/CartView";
-import { CheckoutView } from "../components/CheckoutView";
-import { OrderSuccessView } from "../components/OrderSuccessView";
-import { AccountView } from "../components/AccountView";
-import { OrdersView } from "../components/OrdersView";
-import { ProductsView } from "../components/ProductsView";
-import { EditProfileView } from "../components/EditProfileView";
-import { SavedAddressesView } from "../components/SavedAddressesView";
-import { WishlistView } from "../components/WishlistView";
-import { LoginView } from "../components/LoginView";
-import { RegisterView } from "../components/RegisterView";
-import { AdminPanel } from "../components/AdminPanel";
+import { CartView } from "../components/cart/CartView";
+import { CheckoutView } from "../components/order/CheckoutView";
+import { OrderSuccessView } from "../components/order/OrderSuccessView";
+import { AccountView } from "../components/common/AccountView";
+import { OrdersView } from "../components/order/OrdersView";
+import { ProductsView } from "../components/product/ProductsView";
+import { EditProfileView } from "../components/common/EditProfileView";
+import { SavedAddressesView } from "../components/common/SavedAddressesView";
+import { WishlistView } from "../components/common/WishlistView";
+import { LoginView } from "../components/auth/LoginView";
+import { RegisterView } from "../components/auth/RegisterView";
+import { AdminPanel } from "../components/admin/AdminPanel";
 import { HomeView } from "./HomeView";
 
 interface AppRoutesProps {

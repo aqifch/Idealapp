@@ -70,7 +70,7 @@ if (googleMapsConfig.isAvailable()) {
 
 Old imports:
 ```typescript
-import { projectId, publicAnonKey } from '../utils/supabase/info';
+import { projectId, publicAnonKey } from '../api/supabase/info';
 ```
 
 New imports:

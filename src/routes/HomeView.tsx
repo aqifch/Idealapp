@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product, Category, Deal, Banner } from "../data/mockData";
-import { SearchBar } from "../components/SearchBar";
-import { HomeProductCard } from "../components/HomeProductCard";
-import { NewHeroBanner } from "../components/NewHeroBanner";
-import { NewCategories } from "../components/NewCategories";
-import { DesktopCategoryShowcase } from "../components/DesktopCategoryShowcase";
-import { DesktopDealsSection } from "../components/DesktopDealsSection";
-import { DesktopFeaturedDeals } from "../components/DesktopFeaturedDeals";
-import { DesktopPromoBanner } from "../components/DesktopPromoBanner";
-import { FlashSaleCard } from "../components/FlashSaleCard";
+import { SearchBar } from "../components/common/SearchBar";
+import { HomeProductCard } from "../components/product/HomeProductCard";
+import { NewHeroBanner } from "../components/layout/NewHeroBanner";
+import { NewCategories } from "../components/common/NewCategories";
+import { DesktopCategoryShowcase } from "../components/common/DesktopCategoryShowcase";
+import { DesktopDealsSection } from "../components/common/DesktopDealsSection";
+import { DesktopFeaturedDeals } from "../components/common/DesktopFeaturedDeals";
+import { DesktopPromoBanner } from "../components/layout/DesktopPromoBanner";
+import { FlashSaleCard } from "../components/product/FlashSaleCard";
 
 interface HomeViewProps {
   products: Product[];

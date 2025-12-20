@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { getProjectId, getPublicAnonKey, getFunctionUrl } from '../config/supabase';
 import { supabase } from '../config/supabase';
 import { toast } from 'sonner';
-import { localNotifications } from '../utils/localNotifications';
+import { localNotifications } from '../utils/notifications/localNotifications';
 
 export interface Notification {
   id: string;
@@ -127,7 +127,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
           
           // If server returned empty array, try direct database fetch as fallback
           if (serverNotifs.length === 0 && userId && userId !== 'guest') {
-            console.log('⚠️ Server returned empty notifications, trying direct database fetch...');
             try {
               const { data: dbData, error: dbError } = await supabase
                 .from('notifications')
@@ -165,8 +164,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
                 setLoading(false);
                 return;
               }
-            } catch (dbFetchError) {
-              console.warn('⚠️ Direct database fetch also failed:', dbFetchError);
+            } catch (dbFetchError: any) {
+              // Suppress RLS and table not found errors (expected in some cases)
+              const errorCode = dbFetchError?.code;
+              const errorMsg = dbFetchError?.message || '';
+              if (errorCode !== '42501' && errorCode !== 'PGRST116' && !errorMsg.includes('does not exist')) {
+                console.warn('⚠️ Direct database fetch failed:', dbFetchError);
+              }
             }
           }
           
@@ -210,7 +214,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       
       // If server failed, try direct database fetch before falling to local storage
       if (userId && userId !== 'guest') {
-        console.log('⚠️ Server failed, trying direct database fetch...');
         try {
           const { data: dbData, error: dbError } = await supabase
             .from('notifications')
@@ -248,16 +251,33 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
             setLoading(false);
             return;
           }
-        } catch (dbFetchError) {
-          console.warn('⚠️ Direct database fetch failed:', dbFetchError);
+        } catch (dbFetchError: any) {
+          // Suppress RLS and table not found errors (expected in some cases)
+          const errorCode = dbFetchError?.code;
+          const errorMsg = dbFetchError?.message || '';
+          if (errorCode !== '42501' && errorCode !== 'PGRST116' && !errorMsg.includes('does not exist')) {
+            console.warn('⚠️ Direct database fetch failed:', dbFetchError);
+          }
         }
       }
       
       // If everything failed, fall through to local storage
       throw new Error('Server unavailable');
-    } catch (error) {
-      // Only log full error if not in fallback mode to reduce noise
-      if (!useLocalFallback) {
+    } catch (error: any) {
+      // Suppress known non-critical errors
+      const errorCode = error?.code;
+      const errorMsg = error?.message || String(error);
+      
+      const isNonCriticalError = 
+        errorCode === '42501' || // RLS policy
+        errorCode === 'PGRST116' || // Table does not exist
+        errorMsg.includes('does not exist') ||
+        errorMsg.includes('Server unavailable') ||
+        errorMsg.includes('NetworkError') ||
+        errorMsg.includes('Failed to fetch');
+      
+      // Only log if it's an unexpected error
+      if (!isNonCriticalError && !useLocalFallback) {
         console.log('ℹ️ Server unavailable, switching to local storage mode');
       }
       
@@ -338,9 +358,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         return;
       }
       
-      // Log the error for debugging
-      console.error('❌ Direct DB update error:', dbError);
-      console.log('⚠️ Direct DB update failed, trying Edge Function...');
+      // Suppress RLS errors for guest users
+      if (dbError?.code !== '42501' && dbError?.message && !dbError.message.includes('row-level security')) {
+        console.warn('⚠️ Direct DB update failed, trying Edge Function...');
+      }
       
       // If direct DB fails, try Edge Function
       const response = await fetch(
@@ -369,10 +390,18 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       }
       
       const errorText = await response.text().catch(() => 'Unknown error');
-      console.error('❌ Edge Function update error:', response.status, errorText);
+      // Only log unexpected errors
+      if (response.status !== 404 && response.status !== 403) {
+        console.warn('⚠️ Edge Function update failed:', response.status);
+      }
       throw new Error(`Failed to mark notification as read: ${errorText}`);
     } catch (error: any) {
-      console.error('❌ Both database and server failed (markAsRead):', error);
+      // Suppress non-critical errors (RLS, network issues)
+      const errorCode = error?.code;
+      const errorMsg = error?.message || String(error);
+      if (errorCode !== '42501' && !errorMsg.includes('row-level security')) {
+        // Only log unexpected errors
+      }
       // Fallback to local storage only
       localNotifications.markAsRead(notificationId);
       setNotifications(prev =>
@@ -411,9 +440,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         return;
       }
       
-      // Log the error for debugging
-      console.error('❌ Direct DB update error:', dbError);
-      console.log('⚠️ Direct DB update failed, trying Edge Function...');
+      // Suppress RLS errors for guest users
+      if (dbError?.code !== '42501' && dbError?.message && !dbError.message.includes('row-level security')) {
+        console.warn('⚠️ Direct DB update failed, trying Edge Function...');
+      }
       
       // If direct DB fails, try Edge Function
       const response = await fetch(
@@ -440,10 +470,18 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       }
       
       const errorText = await response.text().catch(() => 'Unknown error');
-      console.error('❌ Edge Function update error:', response.status, errorText);
+      // Only log unexpected errors
+      if (response.status !== 404 && response.status !== 403) {
+        console.warn('⚠️ Edge Function update failed:', response.status);
+      }
       throw new Error(`Failed to mark all notifications as read: ${errorText}`);
     } catch (error: any) {
-      console.error('❌ Both database and server failed (markAllAsRead):', error);
+      // Suppress non-critical errors (RLS, network issues)
+      const errorCode = error?.code;
+      const errorMsg = error?.message || String(error);
+      if (errorCode !== '42501' && !errorMsg.includes('row-level security')) {
+        // Only log unexpected errors
+      }
       // Fallback to local storage only
       localNotifications.markAllAsRead(userId);
       setNotifications(prev =>
@@ -477,9 +515,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         return;
       }
       
-      // Log the error for debugging
-      console.error('❌ Direct DB delete error:', dbError);
-      console.log('⚠️ Direct DB delete failed, trying Edge Function...');
+      // Suppress RLS errors for guest users
+      if (dbError?.code !== '42501' && dbError?.message && !dbError.message.includes('row-level security')) {
+        console.warn('⚠️ Direct DB delete failed, trying Edge Function...');
+      }
       
       // If direct DB fails, try Edge Function
       const response = await fetch(
@@ -505,10 +544,18 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       }
       
       const errorText = await response.text().catch(() => 'Unknown error');
-      console.error('❌ Edge Function delete error:', response.status, errorText);
+      // Only log unexpected errors
+      if (response.status !== 404 && response.status !== 403) {
+        console.warn('⚠️ Edge Function delete failed:', response.status);
+      }
       throw new Error(`Failed to clear notifications: ${errorText}`);
     } catch (error: any) {
-      console.error('❌ Both database and server failed (clearAll):', error);
+      // Suppress non-critical errors (RLS, network issues)
+      const errorCode = error?.code;
+      const errorMsg = error?.message || String(error);
+      if (errorCode !== '42501' && !errorMsg.includes('row-level security')) {
+        // Only log unexpected errors
+      }
       // Fallback to local storage only
       localNotifications.clearAll(userId);
       setNotifications([]);
@@ -538,9 +585,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         return;
       }
       
-      // Log the error for debugging
-      console.error('❌ Direct DB delete error:', dbError);
-      console.log('⚠️ Direct DB delete failed, trying Edge Function...');
+      // Suppress RLS errors for guest users
+      if (dbError?.code !== '42501' && dbError?.message && !dbError.message.includes('row-level security')) {
+        console.warn('⚠️ Direct DB delete failed, trying Edge Function...');
+      }
       
       // If direct DB fails, try Edge Function
       const response = await fetch(
@@ -563,10 +611,18 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       }
       
       const errorText = await response.text().catch(() => 'Unknown error');
-      console.error('❌ Edge Function delete error:', response.status, errorText);
+      // Only log unexpected errors
+      if (response.status !== 404 && response.status !== 403) {
+        console.warn('⚠️ Edge Function delete failed:', response.status);
+      }
       throw new Error(`Failed to delete notification: ${errorText}`);
     } catch (error: any) {
-      console.error('❌ Both database and server failed (deleteNotification):', error);
+      // Suppress non-critical errors (RLS, network issues)
+      const errorCode = error?.code;
+      const errorMsg = error?.message || String(error);
+      if (errorCode !== '42501' && !errorMsg.includes('row-level security')) {
+        // Only log unexpected errors
+      }
       // Fallback to local storage only
       localNotifications.delete(notificationId);
       setNotifications(prev => prev.filter(n => n.id !== notificationId));

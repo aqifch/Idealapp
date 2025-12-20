@@ -4,19 +4,19 @@ import { Product, Category, Deal, Banner, categories as defaultCategories, defau
 import { allProducts } from "./data/allProducts";
 import { CartProvider, useCart } from "./context/CartContext";
 import { NotificationProvider, useNotifications } from "./context/NotificationContext";
-import { ProductDetailModal } from "./components/ProductDetailModal";
-import { AddToCartToast } from "./components/AddToCartToast";
-import { EnhancedFlyingProduct } from "./components/EnhancedFlyingProduct";
+import { ProductDetailModal } from "./components/product/ProductDetailModal";
+import { AddToCartToast } from "./components/cart/AddToCartToast";
+import { EnhancedFlyingProduct } from "./components/cart/EnhancedFlyingProduct";
 import { AnimatePresence } from "motion/react";
 
 // New Components
-import { TopHeader } from "./components/TopHeader";
-import { NewBottomNav } from "./components/NewBottomNav";
-import { MenuSidebar } from "./components/MenuSidebar";
-import { OrdersSidebar } from "./components/OrdersSidebar";
+import { TopHeader } from "./components/layout/TopHeader";
+import { NewBottomNav } from "./components/layout/NewBottomNav";
+import { MenuSidebar } from "./components/layout/MenuSidebar";
+import { OrdersSidebar } from "./components/order/OrdersSidebar";
 
 // Desktop Professional Components
-import { DesktopNavBar } from "./components/DesktopNavBar";
+import { DesktopNavBar } from "./components/layout/DesktopNavBar";
 
 // Routes
 import { AppRoutes } from "./routes";
@@ -37,8 +37,8 @@ import {
   fetchBannersFromSupabase,
   saveBannerToSupabase,
   deleteBannerFromSupabase,
-} from "./utils/supabaseDataSync";
-import { fetchOrders, updateOrder as updateOrderInDb, Order } from "./utils/orders";
+} from "./api/supabase/supabaseDataSync";
+import { fetchOrders, updateOrder as updateOrderInDb, Order } from "./utils/api/orders";
 
 function AppContent() {
   const navigate = useNavigate();
@@ -404,7 +404,7 @@ function AppContent() {
       console.log('🔔 Triggering notifications for order:', orderId, 'Status change:', `${oldStatus} → ${newStatus}`, 'User:', customerUserId || 'all');
       
       try {
-        const { triggerAutomation } = await import('./utils/notificationAutomation');
+        const { triggerAutomation } = await import('./utils/notifications/notificationAutomation');
         
         // Trigger general status change notification
         await triggerAutomation('order_status_changed', {
