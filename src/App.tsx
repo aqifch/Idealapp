@@ -41,6 +41,9 @@ import {
 import { fetchOrders, updateOrder as updateOrderInDb, Order } from "./utils/api/orders";
 
 function AppContent() {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:43',message:'AppContent function entry',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -48,8 +51,14 @@ function AppContent() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:50',message:'Auth useEffect entry',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:53',message:'Auth session retrieved',data:{hasSession:!!session,userId:session?.user?.id||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       setUser(session?.user ?? null);
     });
 
@@ -65,8 +74,15 @@ function AppContent() {
 
   // Products State - Centralized for Admin & User sync
   const [products, setProducts] = useState<Product[]>(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:67',message:'Products state init',data:{hasLocalStorage:!!localStorage.getItem('idealpoint_products'),allProductsLength:allProducts.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
     const savedProducts = localStorage.getItem('idealpoint_products');
-    return savedProducts ? JSON.parse(savedProducts) : allProducts;
+    const result = savedProducts ? JSON.parse(savedProducts) : allProducts;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:70',message:'Products state init result',data:{productsCount:result.length,fromLocalStorage:!!savedProducts},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    return result;
   });
 
   // Categories State - Centralized for Admin & User sync
@@ -90,16 +106,25 @@ function AppContent() {
   // Fetch data from Supabase on mount and sync localStorage to Supabase
   useEffect(() => {
     const loadDataFromSupabase = async () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:92',message:'loadDataFromSupabase entry',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       try {
         console.log('🔄 Loading data from Supabase...');
         
         // Fetch all data in parallel
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:97',message:'Before Promise.all Supabase fetch',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         const [dbProducts, dbCategories, dbDeals, dbBanners] = await Promise.all([
           fetchProductsFromSupabase(),
           fetchCategoriesFromSupabase(),
           fetchDealsFromSupabase(),
           fetchBannersFromSupabase(),
         ]);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:102',message:'After Promise.all Supabase fetch',data:{dbProductsCount:dbProducts.length,dbCategoriesCount:dbCategories.length,dbDealsCount:dbDeals.length,dbBannersCount:dbBanners.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
 
         // If database has data, use it (database is source of truth)
         if (dbProducts.length > 0) {
@@ -177,7 +202,13 @@ function AppContent() {
         }
 
         console.log('✅ Data sync complete');
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:179',message:'Data sync complete',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
       } catch (error) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:181',message:'Error loading data from Supabase',data:{errorMessage:error instanceof Error?error.message:String(error),errorName:error instanceof Error?error.name:'Unknown'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         console.error('❌ Error loading data from Supabase:', error);
         console.log('📦 Using localStorage fallback');
       }

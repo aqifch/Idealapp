@@ -1,12 +1,290 @@
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Confirmation","trigger":"order_placed","type":"order"},"timestamp":1765236742889,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Status Changed","trigger":"order_status_changed","type":"order"},"timestamp":1765236762304,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Confirmed Notification","trigger":"order_confirmed","type":"order"},"timestamp":1765236763080,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Confirmation","trigger":"order_placed","type":"order"},"timestamp":1765237316958,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Status Changed","trigger":"order_status_changed","type":"order"},"timestamp":1765237332016,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Confirmed Notification","trigger":"order_confirmed","type":"order"},"timestamp":1765237332728,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Confirmation","trigger":"order_placed","type":"order"},"timestamp":1765239920453,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Status Changed","trigger":"order_status_changed","type":"order"},"timestamp":1765240766307,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Confirmed Notification","trigger":"order_confirmed","type":"order"},"timestamp":1765240766998,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Confirmation","trigger":"order_placed","type":"order"},"timestamp":1765240838490,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Status Changed","trigger":"order_status_changed","type":"order"},"timestamp":1765240893028,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"notificationAutomation.ts:createNotificationFromAutomation:directDB","message":"Creating notification directly in database","data":{"automation":"Order Confirmed Notification","trigger":"order_confirmed","type":"order"},"timestamp":1765240893765,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272336040},"timestamp":1766272336040,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272336045},"timestamp":1766272336045,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272336046},"timestamp":1766272336046,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272336117},"timestamp":1766272336117,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272336118},"timestamp":1766272336118,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272336164},"timestamp":1766272336164,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272336779},"timestamp":1766272336779,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272337350},"timestamp":1766272337350,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272337643},"timestamp":1766272337643,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272337695},"timestamp":1766272337695,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272338449},"timestamp":1766272338449,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272339036},"timestamp":1766272339036,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272339036},"timestamp":1766272339036,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272339036},"timestamp":1766272339036,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272339045},"timestamp":1766272339045,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272339049,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272339051},"timestamp":1766272339051,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272339058},"timestamp":1766272339058,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272339063,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272339064},"timestamp":1766272339064,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272339067},"timestamp":1766272339067,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272339073,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272339074},"timestamp":1766272339074,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272339299},"timestamp":1766272339299,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272339352},"timestamp":1766272339352,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272339625},"timestamp":1766272339625,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272339903},"timestamp":1766272339903,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272340468},"timestamp":1766272340468,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272341108},"timestamp":1766272341108,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272341784},"timestamp":1766272341784,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272342032},"timestamp":1766272342032,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272342032},"timestamp":1766272342032,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272342032,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272342032,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272342032,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272342033,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272342032},"timestamp":1766272342032,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272342032,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272342032,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272342071},"timestamp":1766272342071,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272342083},"timestamp":1766272342083,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272342097,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272342103,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272342125},"timestamp":1766272342125,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272342134,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272342405},"timestamp":1766272342405,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272342678},"timestamp":1766272342678,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272342744},"timestamp":1766272342744,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272342949},"timestamp":1766272342949,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272343395},"timestamp":1766272343395,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272344429},"timestamp":1766272344429,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272347046},"timestamp":1766272347046,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272347045},"timestamp":1766272347045,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272347046},"timestamp":1766272347046,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272347069},"timestamp":1766272347069,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272347071},"timestamp":1766272347071,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272347070},"timestamp":1766272347070,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272347075,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272347076},"timestamp":1766272347076,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272347076},"timestamp":1766272347076,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272347078},"timestamp":1766272347078,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272347077},"timestamp":1766272347077,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272347084,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272347084},"timestamp":1766272347084,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272347097},"timestamp":1766272347097,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272347098},"timestamp":1766272347098,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272347098},"timestamp":1766272347098,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272347103,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272347103},"timestamp":1766272347103,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272347382,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272347383},"timestamp":1766272347383,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272347663,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272347664},"timestamp":1766272347664,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272347703},"timestamp":1766272347703,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272347948,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272347949},"timestamp":1766272347949,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272348333},"timestamp":1766272348333,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272348810},"timestamp":1766272348810,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272351033},"timestamp":1766272351033,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272351033},"timestamp":1766272351033,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272351033},"timestamp":1766272351033,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272351048},"timestamp":1766272351048,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272351052},"timestamp":1766272351052,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272351055},"timestamp":1766272351055,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272351060,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272351062},"timestamp":1766272351062,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272351062},"timestamp":1766272351062,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272351063},"timestamp":1766272351063,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272351064},"timestamp":1766272351065,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272351074,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272351075},"timestamp":1766272351075,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272351089},"timestamp":1766272351089,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272351090},"timestamp":1766272351090,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272351091},"timestamp":1766272351091,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272351097,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272351098},"timestamp":1766272351098,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272351379,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272351379},"timestamp":1766272351379,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272351380},"timestamp":1766272351380,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272351678,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272351679},"timestamp":1766272351679,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272351679},"timestamp":1766272351679,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272351726},"timestamp":1766272351726,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272351951,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272351952},"timestamp":1766272351952,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272351952},"timestamp":1766272351952,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272352193},"timestamp":1766272352193,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272353003},"timestamp":1766272353003,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272354367},"timestamp":1766272354367,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272354367,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272354373,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272354385},"timestamp":1766272354385,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272354386,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272354386},"timestamp":1766272354386,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272354387,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272354395,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272354395,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272355035},"timestamp":1766272355035,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272355036,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272355036},"timestamp":1766272355036,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272355036,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272355036},"timestamp":1766272355036,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272355037,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272355037,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272355037,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272355037,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272355081},"timestamp":1766272355081,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272355082},"timestamp":1766272355082,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272355083},"timestamp":1766272355083,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272355111,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272355126},"timestamp":1766272355126,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272355127},"timestamp":1766272355127,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272355128},"timestamp":1766272355128,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272355146,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272355171},"timestamp":1766272355171,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272355172},"timestamp":1766272355172,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272355173},"timestamp":1766272355173,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272355185,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272355419,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272355420},"timestamp":1766272355420,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272355421},"timestamp":1766272355421,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272355590},"timestamp":1766272355590,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272355687,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272355688},"timestamp":1766272355688,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272355688},"timestamp":1766272355688,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272355776},"timestamp":1766272355776,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272355952,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272355953},"timestamp":1766272355953,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272355954},"timestamp":1766272355954,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272355972},"timestamp":1766272355972,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272356389},"timestamp":1766272356389,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272356711},"timestamp":1766272356711,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272357115},"timestamp":1766272357115,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272358591},"timestamp":1766272358591,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272358591,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272358593,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272358601},"timestamp":1766272358601,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272358601,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272358604,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272358604},"timestamp":1766272358604,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272358607,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272358604,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"main.tsx:68","message":"Before React render","data":{"hasRoot":true},"timestamp":1766272358660,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"main.tsx:74","message":"After React render","data":{"timestamp":1766272358663},"timestamp":1766272358663,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"main.tsx:68","message":"Before React render","data":{"hasRoot":true},"timestamp":1766272358679,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272358679},"timestamp":1766272358679,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272358680,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272358681,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"main.tsx:74","message":"After React render","data":{"timestamp":1766272358683},"timestamp":1766272358683,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"main.tsx:68","message":"Before React render","data":{"hasRoot":true},"timestamp":1766272358683,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"main.tsx:74","message":"After React render","data":{"timestamp":1766272358688},"timestamp":1766272358688,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272358708},"timestamp":1766272358708,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272358709,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272358709,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272358727},"timestamp":1766272358727,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272358733,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272358737,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272358840},"timestamp":1766272358840,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272358841},"timestamp":1766272358841,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272358842},"timestamp":1766272358842,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272359140},"timestamp":1766272359140,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272359152},"timestamp":1766272359152,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272359142},"timestamp":1766272359142,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272359152},"timestamp":1766272359152,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272359153},"timestamp":1766272359153,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272359141},"timestamp":1766272359141,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272359218,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272359248},"timestamp":1766272359248,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272359268,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272359278,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272359322},"timestamp":1766272359322,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272359336},"timestamp":1766272359336,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272359626,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272359629},"timestamp":1766272359629,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272359628},"timestamp":1766272359628,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272359890},"timestamp":1766272359890,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272359934,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272359935},"timestamp":1766272359935,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272359936},"timestamp":1766272359936,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272360175,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272360177},"timestamp":1766272360177,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272360178},"timestamp":1766272360178,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272360381},"timestamp":1766272360381,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272360496},"timestamp":1766272360496,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272361079},"timestamp":1766272361079,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272361187},"timestamp":1766272361187,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272361565},"timestamp":1766272361565,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272374645},"timestamp":1766272374645,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272374646,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272374655,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272374679},"timestamp":1766272374679,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272374680,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272374689,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272374783},"timestamp":1766272374783,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272374784,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272374789,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272375036},"timestamp":1766272375036,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272375037,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272375038,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272375037},"timestamp":1766272375037,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272375040,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272375040,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272375047},"timestamp":1766272375047,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272375049,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272375052,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272375129},"timestamp":1766272375129,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272375130},"timestamp":1766272375130,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272375132},"timestamp":1766272375132,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272375234},"timestamp":1766272375234,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272375237},"timestamp":1766272375237,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272375241},"timestamp":1766272375241,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272375341,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272375405},"timestamp":1766272375405,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272375407},"timestamp":1766272375407,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272375409},"timestamp":1766272375409,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272375486,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272375785},"timestamp":1766272375785,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272375786,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272375788,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"main.tsx:68","message":"Before React render","data":{"hasRoot":true},"timestamp":1766272375927,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"main.tsx:74","message":"After React render","data":{"timestamp":1766272375930},"timestamp":1766272375930,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272375959},"timestamp":1766272375959,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272375972,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272375977,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272376111},"timestamp":1766272376111,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272376112,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272376113,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:14","message":"createSupabaseClient entry","data":{"timestamp":1766272376139},"timestamp":1766272376139,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:17","message":"Supabase config check","data":{"isValid":true,"hasUrl":true,"hasKey":true,"urlLength":40,"keyLength":208},"timestamp":1766272376140,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"supabase.ts:23","message":"Supabase client created","data":{"hasClient":true},"timestamp":1766272376143,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272376199},"timestamp":1766272376199,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272376200},"timestamp":1766272376200,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272376200},"timestamp":1766272376200,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"main.tsx:68","message":"Before React render","data":{"hasRoot":true},"timestamp":1766272376207,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"main.tsx:74","message":"After React render","data":{"timestamp":1766272376209},"timestamp":1766272376209,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"main.tsx:68","message":"Before React render","data":{"hasRoot":true},"timestamp":1766272376215,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"main.tsx:74","message":"After React render","data":{"timestamp":1766272376217},"timestamp":1766272376217,"sessionId":"debug-session","runId":"run1","hypothesisId":"D"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272376235},"timestamp":1766272376235,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272376245,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272376246,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272376233},"timestamp":1766272376233,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:67","message":"Products state init","data":{"hasLocalStorage":true,"allProductsLength":12},"timestamp":1766272376255,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:70","message":"Products state init result","data":{"productsCount":10,"fromLocalStorage":true},"timestamp":1766272376260,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272376357,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272376362},"timestamp":1766272376362,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272376494},"timestamp":1766272376494,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272376497},"timestamp":1766272376497,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272376500},"timestamp":1766272376500,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272376521,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272376525},"timestamp":1766272376525,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:50","message":"Auth useEffect entry","data":{"timestamp":1766272376561},"timestamp":1766272376561,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:92","message":"loadDataFromSupabase entry","data":{"timestamp":1766272376562},"timestamp":1766272376562,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:97","message":"Before Promise.all Supabase fetch","data":{"timestamp":1766272376564},"timestamp":1766272376564,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:53","message":"Auth session retrieved","data":{"hasSession":false,"userId":null},"timestamp":1766272376624,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272376627},"timestamp":1766272376627,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272376919,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272376920},"timestamp":1766272376920,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272376921},"timestamp":1766272376921,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272377077},"timestamp":1766272377077,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272377165},"timestamp":1766272377165,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272377391,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272377393},"timestamp":1766272377393,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272377393},"timestamp":1766272377393,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272377925},"timestamp":1766272377925,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:102","message":"After Promise.all Supabase fetch","data":{"dbProductsCount":10,"dbCategoriesCount":6,"dbDealsCount":2,"dbBannersCount":4},"timestamp":1766272377927,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:179","message":"Data sync complete","data":{"timestamp":1766272377928},"timestamp":1766272377928,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272377929},"timestamp":1766272377929,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272378082},"timestamp":1766272378082,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272378796},"timestamp":1766272378796,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
+{"location":"App.tsx:43","message":"AppContent function entry","data":{"timestamp":1766272378997},"timestamp":1766272378997,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}

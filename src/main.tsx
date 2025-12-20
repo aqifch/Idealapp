@@ -65,6 +65,9 @@
     event.preventDefault();
   });
 
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:68',message:'Before React render',data:{hasRoot:!!document.getElementById("root")},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+  // #endregion
   createRoot(document.getElementById("root")!).render(
     <ErrorBoundary>
       <BrowserRouter>
@@ -72,4 +75,7 @@
       </BrowserRouter>
     </ErrorBoundary>
   );
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:74',message:'After React render',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+  // #endregion
   
