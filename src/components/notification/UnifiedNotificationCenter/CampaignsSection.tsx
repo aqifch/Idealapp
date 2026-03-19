@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../../utils/logger';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Megaphone, 
@@ -59,7 +60,7 @@ export const CampaignsSection: React.FC<CampaignsSectionProps> = ({ onRefresh })
       if (error) {
         // Suppress RLS errors if table exists but access denied
         if (error.code === '42501' || error.message?.includes('row-level security')) {
-          console.warn('⚠️ RLS policy blocking access to campaigns');
+          logger.warn('⚠️ RLS policy blocking access to campaigns');
           setCampaigns([]);
           return;
         }

@@ -4,52 +4,32 @@ import { ChevronLeft, Heart, ShoppingCart, Trash2, X, Star } from "lucide-react"
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { toast } from "sonner";
 import { useCart } from "../../context/CartContext";
-
-interface WishlistItem {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  rating: number;
-  category: string;
-}
+import { useWishlistStore } from "../../store/useWishlistStore";
+import { Product } from "../../data/mockData";
 
 interface WishlistViewProps {
   onBack: () => void;
   onProductClick?: (product: any) => void;
-  wishlistItems: WishlistItem[];
-  onRemoveFromWishlist: (productId: string) => void;
 }
 
-export const WishlistView = ({ onBack, onProductClick, wishlistItems, onRemoveFromWishlist }: WishlistViewProps) => {
+export const WishlistView = ({ onBack, onProductClick }: WishlistViewProps) => {
   const { addToCart } = useCart();
+  const wishlistItems = useWishlistStore((state) => state.wishlistItems);
+  const remove = useWishlistStore((state) => state.handleRemoveFromWishlist);
 
   const handleRemoveFromWishlist = (itemId: string, itemName: string) => {
-    onRemoveFromWishlist(itemId);
+    remove(itemId);
     toast.success(`${itemName} removed from wishlist ❤️`);
   };
 
-  const handleAddToCart = (item: WishlistItem) => {
-    addToCart({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      image: item.image,
-      quantity: 1,
-    });
+  const handleAddToCart = (item: Product) => {
+    addToCart(item);
     toast.success(`${item.name} added to cart! 🛒`);
   };
 
   const handleAddAllToCart = () => {
     wishlistItems.forEach(item => {
-      addToCart({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        quantity: 1,
-      });
+      addToCart(item);
     });
     toast.success(`All ${wishlistItems.length} items added to cart! 🎉`);
   };
@@ -284,7 +264,7 @@ export const WishlistView = ({ onBack, onProductClick, wishlistItems, onRemoveFr
                             color: '#F97316',
                           }}
                         >
-                          {item.category}
+                          {item.category || "Uncategorized"}
                         </p>
                       </div>
                       <motion.button

@@ -1,0 +1,10 @@
+open C:\Users\Sajid\.supabase\profile: The system cannot find the path specified.
+Using access token for profile: supabase
+Loading project ref from flag: ugjxqpdnvhnbtnbcxzjp
+Supabase CLI 2.78.1
+Using profile: supabase (supabase.co)
+WARNING: Docker is not running
+Using access token for profile: supabase
+2026/03/11 05:37:22 HTTP POST: https://api.supabase.com/v1/projects/ugjxqpdnvhnbtnbcxzjp/functions/deploy?slug=send-push
+Uploading asset (send-push): supabase/functions/send-push/index.ts
+unexpected deploy status 403: {"message":"Forbidden resource"}

@@ -9,6 +9,8 @@
  * const apiKey = config.supabase.publicKey;
  */
 
+import logger from '../utils/logger';
+
 /**
  * Get environment variable with fallback
  */
@@ -17,12 +19,12 @@ function getEnv(key: string, defaultValue: string = ''): string {
   if (import.meta.env?.[key]) {
     return import.meta.env[key] as string;
   }
-  
+
   // Fallback to process.env for compatibility
   if (typeof process !== 'undefined' && process.env?.[key]) {
     return process.env[key] as string;
   }
-  
+
   return defaultValue;
 }
 
@@ -30,18 +32,18 @@ function getEnv(key: string, defaultValue: string = ''): string {
  * Supabase Configuration
  */
 export const supabaseConfig = {
-  projectId: getEnv('VITE_SUPABASE_PROJECT_ID', 'ugjxqpndvnhbtnbcxzjp'),
-  publicAnonKey: getEnv('VITE_SUPABASE_ANON_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnanhxcG5kdm5oYnRuYmN4empwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTQ3MjQsImV4cCI6MjA3OTkzMDcyNH0.nW7ex44_QTCgU11WtKGrs_bToGg7bOAcecl4bkbjT00'),
-  publishableKey: getEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_apuWd2u-A3Amf__0nw2daw_c4lK5ZgT'),
+  projectId: getEnv('VITE_SUPABASE_PROJECT_ID'),
+  publicAnonKey: getEnv('VITE_SUPABASE_ANON_KEY'),
+  publishableKey: getEnv('VITE_SUPABASE_PUBLISHABLE_KEY'),
   url: () => `https://${supabaseConfig.projectId}.supabase.co`,
-  
+
   /**
    * Get Supabase Edge Function URL
    */
   getFunctionUrl: (functionName: string) => {
     return `https://${supabaseConfig.projectId}.supabase.co/functions/v1/${functionName}`;
   },
-  
+
   /**
    * Validate Supabase configuration
    */
@@ -55,12 +57,12 @@ export const supabaseConfig = {
  */
 export const googleMapsConfig = {
   apiKey: getEnv('VITE_GOOGLE_MAPS_API_KEY', ''),
-  
+
   /**
    * Check if Google Maps API key is available
    */
   isAvailable: () => googleMapsConfig.apiKey.length > 0,
-  
+
   /**
    * Get Google Maps script URL
    */
@@ -68,7 +70,7 @@ export const googleMapsConfig = {
     const libs = libraries.join(',');
     return `https://maps.googleapis.com/maps/api/js?key=${googleMapsConfig.apiKey}&libraries=${libs}`;
   },
-  
+
   /**
    * Set API key manually (for runtime configuration)
    */
@@ -87,7 +89,7 @@ export const appConfig = {
   env: getEnv('VITE_APP_ENV', 'development'),
   isDevelopment: () => appConfig.env === 'development',
   isProduction: () => appConfig.env === 'production',
-  
+
   /**
    * API Base URL
    */
@@ -111,20 +113,20 @@ export const config = {
 export function validateConfig() {
   if (appConfig.isDevelopment()) {
     console.group('🔧 Configuration Status');
-    
+
     if (supabaseConfig.isValid()) {
-      console.log('✅ Supabase: Configured');
+      logger.log('✅ Supabase: Configured');
     } else {
-      console.warn('⚠️ Supabase: Missing configuration');
+      logger.warn('⚠️ Supabase: Missing configuration');
     }
-    
+
     if (googleMapsConfig.isAvailable()) {
-      console.log('✅ Google Maps: Configured');
+      logger.log('✅ Google Maps: Configured');
     } else {
-      console.warn('⚠️ Google Maps: API key not found');
+      logger.warn('⚠️ Google Maps: API key not found');
       console.info('   To enable: Add VITE_GOOGLE_MAPS_API_KEY to .env file');
     }
-    
+
     console.groupEnd();
   }
 }
@@ -134,6 +136,11 @@ if (typeof window !== 'undefined' && appConfig.isDevelopment()) {
   validateConfig();
 }
 
+// --- Local Upload API Configurations ---
+// For development, we use port 5000 from local Express server
+// In production, this can be an environment variable
+export const UPLOAD_API_URL = import.meta.env.VITE_UPLOAD_API_URL || 'http://localhost:5000/api/upload';
+
 // Default export
-export default config;
+export default { ...config, UPLOAD_API_URL };
 

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /checkout
+Disallow: /order-success
+Disallow: /edit-profile
+Disallow: /saved-addresses
+
+Sitemap: https://idealpoint.pk/sitemap.xml

@@ -1,0 +1,119 @@
+src/api/supabase/info.tsx(13,26): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.
+src/api/supabase/info.tsx(14,30): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.
+src/api/supabase/supabaseDataSync.ts(9,49): error TS2307: Cannot find module '../data/mockData' or its corresponding type declarations.
+src/components/admin/AdminBannerModal.tsx(492,29): error TS2532: Object is possibly 'undefined'.
+src/components/admin/AdminBannerModal.tsx(492,79): error TS2532: Object is possibly 'undefined'.
+src/components/admin/AdminDealModal.tsx(4,31): error TS2307: Cannot find module '../data/mockData' or its corresponding type declarations.
+src/components/admin/NotificationAutomationAdmin.tsx(169,7): error TS2739: Type 'Record<string, any>' is missing the following properties from type '{ title: string; message: string; image_url: string; action_url: string; }': title, message, image_url, action_url
+src/components/admin/NotificationCampaignsAdmin.tsx(47,60): error TS2307: Cannot find module '../utils/notificationAutomation' or its corresponding type declarations.
+src/components/admin/NotificationCampaignsAdmin.tsx(59,60): error TS2307: Cannot find module '../utils/notificationAutomation' or its corresponding type declarations.
+src/components/admin/NotificationCampaignsAdmin.tsx(102,62): error TS2307: Cannot find module '../utils/notificationAutomation' or its corresponding type declarations.
+src/components/admin/NotificationCampaignsAdmin.tsx(132,62): error TS2307: Cannot find module '../utils/notificationAutomation' or its corresponding type declarations.
+src/components/admin/NotificationsAdmin.tsx(51,70): error TS2345: Argument of type '() => LocalNotification[]' is not assignable to parameter of type 'Notification[] | (() => Notification[])'.
+  Type '() => LocalNotification[]' is not assignable to type '() => Notification[]'.
+    Type 'LocalNotification[]' is not assignable to type 'Notification[]'.
+      Type 'LocalNotification' is not assignable to type 'Notification'.
+        Types of property 'type' are incompatible.
+          Type 'NotificationType' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+            Type '"info"' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+src/components/admin/NotificationsAdmin.tsx(124,24): error TS2345: Argument of type 'LocalNotification[]' is not assignable to parameter of type 'SetStateAction<Notification[]>'.
+  Type 'LocalNotification[]' is not assignable to type 'Notification[]'.
+    Type 'LocalNotification' is not assignable to type 'Notification'.
+      Types of property 'type' are incompatible.
+        Type 'NotificationType' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+          Type '"info"' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+src/components/admin/NotificationsAdmin.tsx(806,53): error TS2339: Property 'price' does not exist on type 'Deal'.
+src/components/cart/EnhancedFlyingProduct.tsx(92,11): error TS2322: Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+  Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+    Type 'number[]' is not assignable to type 'Easing[]'.
+      Type 'number' is not assignable to type 'Easing'.
+src/components/cart/EnhancedFlyingProduct.tsx(246,11): error TS2322: Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+  Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+    Type 'number[]' is not assignable to type 'Easing[]'.
+      Type 'number' is not assignable to type 'Easing'.
+src/components/common/AnimationDemo.tsx(57,22): error TS2345: Argument of type 'RefObject<HTMLDivElement | null>' is not assignable to parameter of type 'RefObject<HTMLDivElement>'.
+  Type 'HTMLDivElement | null' is not assignable to type 'HTMLDivElement'.
+    Type 'null' is not assignable to type 'HTMLDivElement'.
+src/components/common/DesktopCategoryShowcase.tsx(4,20): error TS7016: Could not find a declaration file for module 'react-slick'. 'D:/Anroid ideal project/idealapp/node_modules/react-slick/lib/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-slick` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-slick';`
+src/components/common/DesktopCategoryShowcase.tsx(27,24): error TS2339: Property 'displayOrder' does not exist on type 'Category | { id: string; name: string; icon: string; color: string; isActive: boolean; }'.
+  Property 'displayOrder' does not exist on type '{ id: string; name: string; icon: string; color: string; isActive: boolean; }'.
+src/components/common/DesktopCategoryShowcase.tsx(27,48): error TS2339: Property 'displayOrder' does not exist on type 'Category | { id: string; name: string; icon: string; color: string; isActive: boolean; }'.
+  Property 'displayOrder' does not exist on type '{ id: string; name: string; icon: string; color: string; isActive: boolean; }'.
+src/components/common/FeaturedSection.tsx(2,34): error TS2307: Cannot find module '../data/mockData' or its corresponding type declarations.
+src/components/common/FeaturedSection.tsx(3,29): error TS2307: Cannot find module './ProductCard' or its corresponding type declarations.
+src/components/common/FeaturedSection.tsx(4,25): error TS2307: Cannot find module '../data/mockData' or its corresponding type declarations.
+src/components/common/FeaturedSection.tsx(15,32): error TS7006: Parameter 'product' implicitly has an 'any' type.
+src/components/common/FlashDeals.tsx(4,30): error TS2307: Cannot find module './HeroDealCard' or its corresponding type declarations.
+src/components/common/NewCategories.tsx(26,24): error TS2339: Property 'displayOrder' does not exist on type 'Category | { id: string; name: string; icon: string; color: string; isActive: boolean; }'.
+  Property 'displayOrder' does not exist on type '{ id: string; name: string; icon: string; color: string; isActive: boolean; }'.
+src/components/common/NewCategories.tsx(26,48): error TS2339: Property 'displayOrder' does not exist on type 'Category | { id: string; name: string; icon: string; color: string; isActive: boolean; }'.
+  Property 'displayOrder' does not exist on type '{ id: string; name: string; icon: string; color: string; isActive: boolean; }'.
+src/components/layout/Header.tsx(5,29): error TS2459: Module '"../notification/NotificationPanel"' declares 'Notification' locally, but it is not exported.
+src/components/layout/NewBottomNav.tsx(80,27): error TS2339: Property 'badge' does not exist on type '{ id: string; path: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: string; }'.
+src/components/layout/NewBottomNav.tsx(80,41): error TS2339: Property 'badge' does not exist on type '{ id: string; path: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: string; }'.
+src/components/layout/NewBottomNav.tsx(97,33): error TS2339: Property 'badge' does not exist on type '{ id: string; path: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: string; }'.
+src/components/layout/NewBottomNav.tsx(97,57): error TS2339: Property 'badge' does not exist on type '{ id: string; path: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: string; }'.
+src/components/notification/UnifiedNotificationCenter/AnalyticsPanel.tsx(5,93): error TS2307: Cannot find module '../../utils/notificationAnalytics' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/AutomationsSection.tsx(22,8): error TS2307: Cannot find module '../../utils/notificationAutomation' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/AutomationsSection.tsx(23,54): error TS2307: Cannot find module '../../utils/notificationTemplates' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/AutomationsSection.tsx(24,26): error TS2307: Cannot find module '../../config/supabase' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/BulkOperations.tsx(5,44): error TS2307: Cannot find module '../../utils/unifiedNotificationService' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/CampaignsSection.tsx(16,26): error TS2307: Cannot find module '../../config/supabase' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/CampaignsSection.tsx(17,38): error TS2307: Cannot find module '../../utils/notificationAutomation' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/ComposeSection.tsx(21,50): error TS2307: Cannot find module '../../config/supabase' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/ComposeSection.tsx(22,36): error TS2307: Cannot find module '../../utils/localNotifications' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/ComposeSection.tsx(23,44): error TS2307: Cannot find module '../../utils/unifiedNotificationService' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/ComposeSection.tsx(109,45): error TS2307: Cannot find module '../../config/supabase' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/TemplatesSection.tsx(21,8): error TS2307: Cannot find module '../../utils/notificationTemplates' or its corresponding type declarations.
+src/components/notification/UnifiedNotificationCenter/TemplatesSection.tsx(164,52): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/components/notification/UnifiedNotificationCenter/TemplatesSection.tsx(313,48): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/components/notification/UnifiedNotificationCenter/TemplatesSection.tsx(313,86): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/components/notification/UnifiedNotificationCenter/UserSegmentation.tsx(6,63): error TS2307: Cannot find module '../../utils/notificationSegmentation' or its corresponding type declarations.
+src/components/order/CheckoutView.tsx(176,31): error TS2339: Property 'customization' does not exist on type 'CartItem'.
+src/components/ui/toggle-group.tsx(4,39): error TS2307: Cannot find module '@radix-ui/react-toggle-group@1.1.2' or its corresponding type declarations.
+src/context/NotificationContext.tsx(90,30): error TS2345: Argument of type 'LocalNotification[]' is not assignable to parameter of type 'SetStateAction<Notification[]>'.
+  Type 'LocalNotification[]' is not assignable to type 'Notification[]'.
+    Type 'LocalNotification' is not assignable to type 'Notification'.
+      Types of property 'type' are incompatible.
+        Type 'NotificationType' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+          Type '"info"' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+src/context/NotificationContext.tsx(92,30): error TS2345: Argument of type 'LocalNotification[]' is not assignable to parameter of type 'SetStateAction<Notification[]>'.
+  Type 'LocalNotification[]' is not assignable to type 'Notification[]'.
+    Type 'LocalNotification' is not assignable to type 'Notification'.
+      Types of property 'type' are incompatible.
+        Type 'NotificationType' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+          Type '"info"' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+src/context/NotificationContext.tsx(165,34): error TS2345: Argument of type '(LocalNotification | { id: string; type: any; title: any; message: any; timestamp: any; isNew: boolean; isRead: any; targetUserId: any; actionUrl: any; imageUrl: any; productId: any; dealId: any; isBroadcast: any; })[]' is not assignable to parameter of type 'SetStateAction<Notification[]>'.
+  Type '(LocalNotification | { id: string; type: any; title: any; message: any; timestamp: any; isNew: boolean; isRead: any; targetUserId: any; actionUrl: any; imageUrl: any; productId: any; dealId: any; isBroadcast: any; })[]' is not assignable to type 'Notification[]'.
+    Type 'LocalNotification | { id: string; type: any; title: any; message: any; timestamp: any; isNew: boolean; isRead: any; targetUserId: any; actionUrl: any; imageUrl: any; productId: any; dealId: any; isBroadcast: any; }' is not assignable to type 'Notification'.
+      Type 'LocalNotification' is not assignable to type 'Notification'.
+        Types of property 'type' are incompatible.
+          Type 'NotificationType' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+            Type '"info"' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+src/context/NotificationContext.tsx(252,30): error TS2345: Argument of type '(LocalNotification | { id: string; type: any; title: any; message: any; timestamp: any; isNew: boolean; isRead: any; targetUserId: any; actionUrl: any; imageUrl: any; productId: any; dealId: any; isBroadcast: any; })[]' is not assignable to parameter of type 'SetStateAction<Notification[]>'.
+  Type '(LocalNotification | { id: string; type: any; title: any; message: any; timestamp: any; isNew: boolean; isRead: any; targetUserId: any; actionUrl: any; imageUrl: any; productId: any; dealId: any; isBroadcast: any; })[]' is not assignable to type 'Notification[]'.
+    Type 'LocalNotification | { id: string; type: any; title: any; message: any; timestamp: any; isNew: boolean; isRead: any; targetUserId: any; actionUrl: any; imageUrl: any; productId: any; dealId: any; isBroadcast: any; }' is not assignable to type 'Notification'.
+      Type 'LocalNotification' is not assignable to type 'Notification'.
+        Types of property 'type' are incompatible.
+          Type 'NotificationType' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+            Type '"info"' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+src/context/NotificationContext.tsx(298,26): error TS2345: Argument of type 'LocalNotification[]' is not assignable to parameter of type 'SetStateAction<Notification[]>'.
+  Type 'LocalNotification[]' is not assignable to type 'Notification[]'.
+    Type 'LocalNotification' is not assignable to type 'Notification'.
+      Types of property 'type' are incompatible.
+        Type 'NotificationType' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+          Type '"info"' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+src/context/NotificationContext.tsx(301,26): error TS2345: Argument of type 'LocalNotification[]' is not assignable to parameter of type 'SetStateAction<Notification[]>'.
+  Type 'LocalNotification[]' is not assignable to type 'Notification[]'.
+    Type 'LocalNotification' is not assignable to type 'Notification'.
+      Types of property 'type' are incompatible.
+        Type 'NotificationType' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+          Type '"info"' is not assignable to type '"promo" | "order" | "reward" | "delivery" | "system"'.
+src/context/NotificationContext.tsx(376,46): error TS2304: Cannot find name 'getAuthToken'.
+src/context/NotificationContext.tsx(458,46): error TS2304: Cannot find name 'getAuthToken'.
+src/context/NotificationContext.tsx(533,46): error TS2304: Cannot find name 'getAuthToken'.
+src/context/NotificationContext.tsx(603,46): error TS2304: Cannot find name 'getAuthToken'.
+src/utils/notifications/notificationAnalytics.ts(117,7): error TS2740: Type '{}' is missing the following properties from type 'Record<NotificationType, { sent: number; opened: number; clicked: number; openRate: number; clickRate: number; }>': promo, order, reward, delivery, and 5 more.

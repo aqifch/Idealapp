@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, Plus, Send, Trash, Edit2, Eye, Package, Gift, ShoppingCart, Star, X, Save, AlertCircle, Image as ImageIcon, Tag, Zap, Megaphone, FileText } from 'lucide-react';
 import { getProjectId, getPublicAnonKey, getFunctionUrl } from '../../config/supabase';
@@ -76,11 +77,13 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
   // Fetch notifications
   const fetchNotifications = async () => {
     try {
+      const { getAuthToken } = await import('../../config/supabase');
+      const token = await getAuthToken();
       const response = await fetch(
         getFunctionUrl('make-server-b09ae082/notifications'),
         {
           headers: {
-            'Authorization': `Bearer ${getPublicAnonKey()}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -112,7 +115,7 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
       
       throw new Error('Server unavailable');
     } catch (error) {
-      console.log('ℹ️ Server unavailable, using local storage fallback');
+      logger.log('ℹ️ Server unavailable, using local storage fallback');
       setUseLocalFallback(true);
       // We already loaded from local, but let's refresh just in case
       const localNotifs = localNotifications.getAll().sort((a, b) => 
@@ -151,7 +154,7 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
       // Fallback to local
       setStats(localNotifications.getStats());
     } catch (error) {
-      console.log('ℹ️ Error fetching stats, falling back to local');
+      logger.log('ℹ️ Error fetching stats, falling back to local');
       setStats(localNotifications.getStats());
     }
   };
@@ -205,7 +208,7 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
         ? getFunctionUrl('make-server-b09ae082/notifications/broadcast')
         : getFunctionUrl('make-server-b09ae082/notifications');
 
-      console.log('📤 Creating notification:', {
+      logger.log('📤 Creating notification:', {
         endpoint,
         isBroadcast,
         data: notificationData
@@ -214,17 +217,17 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${publicAnonKey}`,
+          'Authorization': `Bearer ${getPublicAnonKey()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(notificationData),
       });
 
-      console.log('📡 Response status:', response.status);
+      logger.log('📡 Response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Notification created:', data);
+        logger.log('✅ Notification created:', data);
         
         if (data.success) {
           toast.success(isBroadcast ? '📢 Broadcast sent to all users!' : '✅ Notification created!');
@@ -237,9 +240,9 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
       
       throw new Error('Server unavailable');
     } catch (error) {
-      console.log('ℹ️ Error creating notification, falling back to local');
+      logger.log('ℹ️ Error creating notification, falling back to local');
       // Fallback to local
-      console.log('ℹ️ Using local storage fallback');
+      logger.log('ℹ️ Using local storage fallback');
       localNotifications.create({
         ...notificationData,
         createdBy: 'admin',
@@ -352,7 +355,7 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
         throw new Error('Failed to update notification');
       }
     } catch (error) {
-      console.log('ℹ️ Error updating notification, falling back to local');
+      logger.log('ℹ️ Error updating notification, falling back to local');
       // Fallback to local
       localNotifications.update(selectedNotification.id, {
         ...notificationData,
@@ -394,7 +397,7 @@ export const NotificationsAdmin = ({ products = [], deals = [] }: NotificationsA
       toast.success('🗑️ Notification deleted');
       await Promise.all([fetchNotifications(), fetchStats()]);
     } catch (error) {
-      console.log('ℹ️ Error deleting notification, falling back to local');
+      logger.log('ℹ️ Error deleting notification, falling back to local');
       // Fallback to local
       localNotifications.delete(id);
       toast.success('🗑️ Notification deleted (local mode)');

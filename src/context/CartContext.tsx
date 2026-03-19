@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Product, ProductSize } from "../data/mockData";
 
 export interface CartItem extends Product {
@@ -39,7 +39,15 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    const saved = localStorage.getItem('idealpoint_cart');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Persist cart to localStorage
+  useEffect(() => {
+    localStorage.setItem('idealpoint_cart', JSON.stringify(cartItems));
+  }, [cartItems]);
   const [flyingProducts, setFlyingProducts] = useState<FlyingProductData[]>([]);
   const [showToast, setShowToast] = useState(false);
   const [toastProductName, setToastProductName] = useState("");
@@ -50,9 +58,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems((prev) => {
       // Create unique ID for cart item
       const cartId = size ? `${product.id}-${size.name}` : product.id;
-      
+
       const existingItem = prev.find((item) => item.cartId === cartId);
-      
+
       if (existingItem) {
         // If item exists, increase quantity
         return prev.map((item) =>
@@ -64,9 +72,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         // If item doesn't exist, add it with quantity 1
         // If size is selected, override price
         const price = size ? size.price : product.price;
-        
-        return [...prev, { 
-          ...product, 
+
+        return [...prev, {
+          ...product,
           price, // Use size price if available
           quantity: 1,
           selectedSize: size,
@@ -74,7 +82,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         }];
       }
     });
-    
+
     // Set toast product name
     const nameWithSize = size ? `${product.name} (${size.name})` : product.name;
     setToastProductName(nameWithSize);
@@ -99,6 +107,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const clearCart = () => {
     setCartItems([]);
+    localStorage.removeItem('idealpoint_cart');
   };
 
   const getTotalItems = () => {

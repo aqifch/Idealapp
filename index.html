@@ -1,15 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>ideal app</title>
-    </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
 
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-    </body>
-  </html>
-  
+  <!-- SEO Meta Tags -->
+  <title>Ideal Point — Fast Food Delivery | Burgers, Pizza & More</title>
+  <meta name="description"
+    content="Order delicious burgers, pizza, chicken, fries and more from Ideal Point. Fast delivery, fresh food, great prices. Order online now!" />
+  <meta name="keywords" content="fast food, delivery, burger, pizza, chicken, fries, order online, ideal point" />
+  <meta name="author" content="Ideal Point" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Ideal Point — Fast Food Delivery" />
+  <meta property="og:description"
+    content="Order delicious burgers, pizza, chicken & more. Fresh food, fast delivery, great prices!" />
+  <meta property="og:site_name" content="Ideal Point" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:url" content="https://idealpoint.pk/" />
+  <meta property="og:image" content="https://idealpoint.pk/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Ideal Point — Fast Food Delivery" />
+  <meta name="twitter:description"
+    content="Order delicious burgers, pizza, chicken & more. Fresh food, fast delivery!" />
+  <meta name="twitter:image" content="https://idealpoint.pk/og-image.jpg" />
+
+  <!-- Theme & App -->
+  <meta name="theme-color" content="#FF9F40" />
+  <meta name="msapplication-TileColor" content="#FF9F40" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Ideal Point" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://idealpoint.pk/" />
+
+  <!-- Preconnect for faster external resource loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://images.unsplash.com" />
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <!-- Structured Data (JSON-LD) — Restaurant Schema for Google Rich Results -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Restaurant",
+      "name": "Ideal Point",
+      "description": "Order delicious burgers, pizza, chicken, fries and more from Ideal Point. Fast delivery, fresh food, great prices.",
+      "url": "https://idealpoint.pk",
+      "image": "https://idealpoint.pk/og-image.jpg",
+      "telephone": "+92-XXX-XXXXXXX",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Your Street Address",
+        "addressLocality": "Your City",
+        "addressRegion": "Punjab",
+        "addressCountry": "PK"
+      },
+      "servesCuisine": ["Fast Food", "Burgers", "Pizza", "Chicken", "Fries"],
+      "priceRange": "$$",
+      "currenciesAccepted": "PKR",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+        "opens": "11:00",
+        "closes": "23:00"
+      },
+      "hasMenu": {
+        "@type": "Menu",
+        "url": "https://idealpoint.pk/products"
+      },
+      "sameAs": []
+    }
+    </script>
+</head>
+
+<body>
+  <!-- No-Script Fallback -->
+  <noscript>
+    <div style="text-align:center;padding:40px;font-family:sans-serif;">
+      <h1>🍔 Ideal Point</h1>
+      <p>You need to enable JavaScript to run this app.</p>
+    </div>
+  </noscript>
+
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>

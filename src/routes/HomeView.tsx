@@ -10,16 +10,19 @@ import { DesktopDealsSection } from "../components/common/DesktopDealsSection";
 import { DesktopFeaturedDeals } from "../components/common/DesktopFeaturedDeals";
 import { DesktopPromoBanner } from "../components/layout/DesktopPromoBanner";
 import { FlashSaleCard } from "../components/product/FlashSaleCard";
+import { Footer } from "../components/layout/Footer";
+
+// Zustand Stores
+import { useProductStore } from "../store/useProductStore";
+import { useCategoryStore } from "../store/useCategoryStore";
+import { useDealStore } from "../store/useDealStore";
+import { useBannerStore } from "../store/useBannerStore";
+import { useWishlistStore } from "../store/useWishlistStore";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 interface HomeViewProps {
-  products: Product[];
-  categories: Category[];
-  deals: Deal[];
-  banners: Banner[];
-  wishlistItems: Product[];
   selectedCategory: string;
   searchQuery: string;
-  storeSettings: any;
   onProductClick: (product: Product) => void;
   onSearch: (query: string) => void;
   onAddToWishlist: (product: Product) => void;
@@ -27,14 +30,8 @@ interface HomeViewProps {
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
-  products,
-  categories,
-  deals,
-  banners,
-  wishlistItems,
   selectedCategory,
   searchQuery,
-  storeSettings,
   onProductClick,
   onSearch,
   onAddToWishlist,
@@ -42,6 +39,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
 }) => {
   const navigate = useNavigate();
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+
+  // Zustand State Selection
+  const products = useProductStore((state) => state.products);
+  const categories = useCategoryStore((state) => state.categories);
+  const deals = useDealStore((state) => state.deals);
+  const banners = useBannerStore((state) => state.banners);
+  const wishlistItems = useWishlistStore((state) => state.wishlistItems);
+  const storeSettings = useSettingsStore((state) => state.storeSettings);
 
   // Filter products for search
   const filteredProducts = products.filter((product) => {
@@ -59,11 +64,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const sortedActiveDeals = activeDeals.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
   // Logic to determine which deal goes where
-  // 1. Flash Sale: Either explicitly set via template, or the one with highest discount
   const flashSaleDeal = sortedActiveDeals.find(d => d.template === 'flash_sale') 
     || sortedActiveDeals.reduce((prev, current) => (prev && prev.discountPercentage > current.discountPercentage) ? prev : current, undefined as Deal | undefined);
 
-  // 2. Other deals for the list/grid section
   const otherDeals = sortedActiveDeals.filter(d => d.id !== flashSaleDeal?.id);
 
   const handleDealClick = (deal: Deal) => {
@@ -149,7 +152,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <div className="relative w-full overflow-hidden" style={{ height: `${storeSettings.bannerHeight || 500}px` }}>
               {(() => {
                 const activeBanners = banners.filter(b => b.type === 'hero' && b.isActive);
-                const layout = storeSettings.bannerLayout || 'single';
+                const layout = (storeSettings.bannerLayout as string) || 'single';
                 const height = `${storeSettings.bannerHeight || 500}px`;
                 const padding = storeSettings.bannerPadding !== undefined ? storeSettings.bannerPadding : 48;
 
@@ -261,7 +264,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </button>
             </div>
 
-            {/* Product Grid - Responsive: 2 cols mobile, 3 tablet, 5 desktop */}
+            {/* Product Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-6">
               {popularProducts.slice(0, 10).map((product, index) => (
                 <HomeProductCard
@@ -279,9 +282,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
           {/* Flash Sale Card */}
           <FlashSaleCard deal={flashSaleDeal} onDealClick={handleDealClick} />
+
+          {/* Footer */}
+          <Footer storeSettings={storeSettings} />
         </>
       )}
     </div>
   );
 };
-

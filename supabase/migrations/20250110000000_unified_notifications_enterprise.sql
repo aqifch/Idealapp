@@ -143,3 +143,6 @@ GRANT ALL ON public.activity_log TO authenticated;
 
 
 
+
+
+

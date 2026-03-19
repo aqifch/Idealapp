@@ -6,6 +6,7 @@
  */
 
 import { googleMapsConfig } from "./index";
+import logger from '../utils/logger';
 
 /**
  * Google Maps Configuration Object
@@ -23,13 +24,13 @@ if (typeof window !== 'undefined') {
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   if (isDev) {
     if (GOOGLE_MAPS_CONFIG.isAvailable()) {
-      console.log('✅ Google Maps API key configured');
+      logger.log('✅ Google Maps API key configured');
     } else {
-      console.warn('⚠️ Google Maps API key not found. Running in manual entry mode.');
-      console.log('To enable Google Maps features:');
-      console.log('1. Get API key from https://console.cloud.google.com/');
-      console.log('2. Create .env file with: VITE_GOOGLE_MAPS_API_KEY=your_key');
-      console.log('3. Restart dev server');
+      logger.warn('⚠️ Google Maps API key not found. Running in manual entry mode.');
+      logger.log('To enable Google Maps features:');
+      logger.log('1. Get API key from https://console.cloud.google.com/');
+      logger.log('2. Create .env file with: VITE_GOOGLE_MAPS_API_KEY=your_key');
+      logger.log('3. Restart dev server');
     }
   }
 }

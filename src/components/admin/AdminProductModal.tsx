@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Save, Upload, Image as ImageIcon, CheckCircle } from 'lucide-react';
-import { Product, Category } from '../data/mockData';
+import { X, Save, Upload, Image as ImageIcon, CheckCircle, Loader2 } from 'lucide-react';
+// @ts-ignore
+import { Product, Category } from '../../data/mockData';
 import { toast } from 'sonner';
+import { supabase } from '../../config/supabase';
 
 interface AdminProductModalProps {
   isOpen: boolean;
@@ -26,7 +28,59 @@ export const AdminProductModal = ({ isOpen, onClose, product, onSave, categories
     discount: 0,
   });
 
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Only JPG, PNG, and WebP images are allowed');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be smaller than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const UPLOAD_API_URL = import.meta.env.VITE_UPLOAD_API_URL || 'http://localhost:5000/api/upload';
+
+      const uploadForm = new FormData();
+      uploadForm.append('image', file);
+
+      const response = await fetch(UPLOAD_API_URL, {
+        method: 'POST',
+        body: uploadForm,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.url) {
+        setFormData((prev: Partial<Product>) => ({ ...prev, image: data.url }));
+        toast.success('Image uploaded! ✅');
+      } else {
+        throw new Error(data.error || 'Upload failed');
+      }
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      toast.error('Upload failed: ' + (err?.message || 'Make sure server is running'));
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   useEffect(() => {
+
     if (product) {
       setFormData(product);
     } else {
@@ -51,7 +105,7 @@ export const AdminProductModal = ({ isOpen, onClose, product, onSave, categories
       toast.error('Please fill in all required fields');
       return;
     }
-    
+
     // Ensure numeric values
     const dataToSave = {
       ...formData,
@@ -143,7 +197,32 @@ export const AdminProductModal = ({ isOpen, onClose, product, onSave, categories
                     </div>
 
                     <div className="col-span-2">
-                      <label className="block text-sm font-bold text-gray-700 mb-2">Image URL</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Product Image</label>
+                      {/* Hidden file input */}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <div className="flex gap-2 mb-2">
+                        {/* Upload button */}
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-orange-300 bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold text-sm transition-all disabled:opacity-60"
+                        >
+                          {isUploading ? (
+                            <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
+                          ) : (
+                            <><Upload className="w-4 h-4" /> Upload Image</>
+                          )}
+                        </button>
+                        <span className="text-xs text-gray-400 self-center">JPG, PNG, WebP · Max 5MB</span>
+                      </div>
+                      {/* URL input */}
                       <div className="flex gap-3">
                         <div className="flex-1 relative">
                           <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -151,13 +230,13 @@ export const AdminProductModal = ({ isOpen, onClose, product, onSave, categories
                             type="text"
                             value={formData.image || ''}
                             onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 outline-none transition-all bg-gray-50 focus:bg-white"
-                            placeholder="https://example.com/image.jpg"
+                            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 outline-none transition-all bg-gray-50 focus:bg-white text-sm"
+                            placeholder="Or paste image URL manually"
                           />
                         </div>
                         {formData.image && (
-                          <div className="w-12 h-12 rounded-xl border border-gray-200 overflow-hidden flex-shrink-0">
-                            <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                          <div className="w-12 h-12 rounded-xl border-2 border-orange-200 overflow-hidden flex-shrink-0 shadow-sm">
+                            <img src={formData.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                           </div>
                         )}
                       </div>

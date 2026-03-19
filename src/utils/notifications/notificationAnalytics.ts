@@ -114,7 +114,7 @@ export const getAnalytics = async (filters?: AnalyticsFilters): Promise<Analytic
       openRate: 0,
       clickRate: 0,
       engagementRate: 0,
-      byType: {},
+      byType: {} as Record<string, any>,
       byDate: [],
       trends: {
         openRateTrend: 0,

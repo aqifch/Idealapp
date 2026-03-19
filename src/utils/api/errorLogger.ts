@@ -1,3 +1,4 @@
+import logger from '../logger';
 /**
  * Error Logger Utility
  * Stores and retrieves error logs from localStorage for debugging
@@ -72,17 +73,17 @@ export const errorLogger = {
   print: (): void => {
     const logs = errorLogger.getAll();
     if (logs.length === 0) {
-      console.log('📋 No error logs found');
+      logger.log('📋 No error logs found');
       return;
     }
     console.group('📋 Error Logs');
     logs.forEach((log, index) => {
       console.group(`Error ${index + 1} (${new Date(log.timestamp).toLocaleString()})`);
-      console.log('Status:', log.status, log.statusText);
-      console.log('URL:', log.url);
-      console.log('Error Data:', log.errorData);
-      if (log.automation) console.log('Automation:', log.automation);
-      if (log.trigger) console.log('Trigger:', log.trigger);
+      logger.log('Status:', log.status, log.statusText);
+      logger.log('URL:', log.url);
+      logger.log('Error Data:', log.errorData);
+      if (log.automation) logger.log('Automation:', log.automation);
+      if (log.trigger) logger.log('Trigger:', log.trigger);
       console.groupEnd();
     });
     console.groupEnd();
@@ -95,8 +96,8 @@ if (import.meta.env.DEV) {
   setTimeout(() => {
     const latest = errorLogger.getLatest();
     if (latest) {
-      console.log('🔍 Latest error detected. Run errorLogger.print() to see all errors.');
-      console.log('Latest error:', latest);
+      logger.log('🔍 Latest error detected. Run errorLogger.print() to see all errors.');
+      logger.log('Latest error:', latest);
     }
   }, 2000);
 }

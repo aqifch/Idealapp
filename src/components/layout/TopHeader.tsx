@@ -13,8 +13,8 @@ interface TopHeaderProps {
   storeSettings?: any;
 }
 
-export const TopHeader = ({ 
-  onCartClick, 
+export const TopHeader = ({
+  onCartClick,
   onWishlistClick,
   cartCount,
   wishlistCount = 0,
@@ -22,12 +22,12 @@ export const TopHeader = ({
   storeSettings
 }: TopHeaderProps) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const { 
-    notifications, 
-    unreadCount, 
-    markAsRead, 
-    markAllAsRead, 
-    clearAll 
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    clearAll
   } = useNotifications();
 
   const handleNotificationClick = () => {
@@ -47,7 +47,7 @@ export const TopHeader = ({
     <>
       <div className="fixed top-0 left-0 right-0 z-50">
         {/* Main Header */}
-        <div 
+        <div
           className="px-5 lg:px-8 py-4 lg:py-5 flex items-center justify-between backdrop-blur-md border-b max-w-[1600px] lg:mx-auto"
           style={{
             background: 'rgba(255, 255, 255, 0.95)',
@@ -56,13 +56,22 @@ export const TopHeader = ({
         >
           {/* Logo Section */}
           <div className="flex items-center gap-2 lg:gap-3">
-            <div 
-              className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center"
+            <div
+              className={`w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center overflow-hidden ${
+                storeSettings?.logoShape === 'none' ? '' :
+                storeSettings?.logoShape === 'circle' ? 'rounded-full' : 
+                storeSettings?.logoShape === 'square' ? 'rounded-none' : 'rounded-xl'
+              }`}
               style={{
-                background: 'linear-gradient(135deg, #FF9F40 0%, #FFB74D 100%)',
+                background: storeSettings?.logoShape === 'none' ? 'transparent' : (storeSettings?.logoBgColor || 'linear-gradient(135deg, #FF9F40 0%, #FFB74D 100%)'),
+                padding: storeSettings?.logoShape === 'none' ? '0px' : `${storeSettings?.logoPadding || 0}px`
               }}
             >
-              <span className="text-2xl lg:text-3xl">🍔</span>
+              {storeSettings?.logo ? (
+                <img src={storeSettings.logo} alt="Logo" className="w-full h-full object-contain" />
+              ) : (
+                <span className="text-2xl lg:text-3xl">🍔</span>
+              )}
             </div>
             <div>
               <h1 className="font-bold text-lg lg:text-xl text-gray-900 leading-none">
@@ -83,7 +92,7 @@ export const TopHeader = ({
             >
               <Heart className="w-6 h-6 lg:w-7 lg:h-7 text-orange-500" />
               {wishlistCount > 0 && (
-                <motion.div 
+                <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="absolute -top-1 -right-1 min-w-[18px] lg:min-w-[20px] h-[18px] lg:h-[20px] px-1 rounded-full flex items-center justify-center shadow-lg"
@@ -107,7 +116,7 @@ export const TopHeader = ({
             >
               <ShoppingCart className="w-6 h-6 lg:w-7 lg:h-7 text-orange-500" />
               {cartCount > 0 && (
-                <motion.div 
+                <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="absolute -top-1 -right-1 min-w-[18px] lg:min-w-[20px] h-[18px] lg:h-[20px] px-1 rounded-full flex items-center justify-center shadow-lg"
@@ -133,7 +142,7 @@ export const TopHeader = ({
               {unreadCount > 0 && (
                 <>
                   {/* Badge with count */}
-                  <motion.div 
+                  <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     className="absolute -top-1 -right-1 min-w-[18px] lg:min-w-[20px] h-[18px] lg:h-[20px] px-1 rounded-full flex items-center justify-center shadow-lg"

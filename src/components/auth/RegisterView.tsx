@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import { Mail, Lock, User, ArrowRight, Loader, Eye, EyeOff, Sparkles, Phone } from "lucide-react";
 import { supabase } from "../../config/supabase";
-import { getProjectId, getPublicAnonKey, getFunctionUrl } from "../../config/supabase";
+import { getProjectId, getPublicAnonKey, getFunctionUrl, getAuthToken } from "../../config/supabase";
 
 interface RegisterViewProps {
   onNavigateToLogin: () => void;
@@ -46,12 +46,13 @@ export const RegisterView = ({ onNavigateToLogin, onRegisterSuccess, onBack, sto
     setIsLoading(true);
 
     try {
+      const token = await getAuthToken();
       // Call server endpoint to create user with auto-confirmed email
       const response = await fetch(getFunctionUrl('make-server-b09ae082/signup'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getPublicAnonKey()}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
             email: formData.email,

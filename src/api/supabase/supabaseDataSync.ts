@@ -196,22 +196,50 @@ const mapDbToBanner = (row: any): Banner => ({
 
 export const fetchProductsFromSupabase = async (): Promise<Product[]> => {
   try {
+    // Join with categories to get the category name (needed because FK stores category ID)
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('*, categories(name)')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data || []).map(mapDbToProduct);
+
+    return (data || []).map((row: any) => ({
+      ...mapDbToProduct(row),
+      // Prefer the joined category name; fall back to whatever is stored in category column
+      category: row.categories?.name ?? row.category ?? '',
+    }));
   } catch (error: any) {
     console.error('Error fetching products:', error);
     return [];
   }
 };
 
+
 export const saveProductToSupabase = async (product: Product | Partial<Product>): Promise<boolean> => {
   try {
     const dbData = mapProductToDb(product);
+
+    // Resolve category: Supabase FK requires a valid category ID.
+    // If the stored category value is a name (e.g. "Burgers"), look up its ID.
+    if (dbData.category) {
+      const isAlreadyId = /^[0-9a-fA-F-]{36}$/.test(dbData.category) || /^\d+$/.test(dbData.category);
+      if (!isAlreadyId) {
+        // It's a name — look up the matching category ID
+        const { data: cats } = await supabase
+          .from('categories')
+          .select('id, name')
+          .ilike('name', dbData.category)
+          .limit(1);
+        if (cats && cats.length > 0) {
+          dbData.category = cats[0].id;
+        } else {
+          // No matching category found — set to null to avoid FK violation
+          dbData.category = null;
+        }
+      }
+    }
+
     const { error } = await supabase
       .from('products')
       .upsert(dbData, { onConflict: 'id' });
@@ -224,6 +252,7 @@ export const saveProductToSupabase = async (product: Product | Partial<Product>)
     return false;
   }
 };
+
 
 export const deleteProductFromSupabase = async (productId: string): Promise<boolean> => {
   try {

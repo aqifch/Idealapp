@@ -30,7 +30,8 @@ import { UserSegmentation } from './UserSegmentation';
 import { ABTesting } from './ABTesting';
 import { LivePreview } from './LivePreview';
 import { ActivityHistory } from './ActivityHistory';
-import { unifiedNotificationService } from '../../utils/unifiedNotificationService';
+import { unifiedNotificationService } from '../../../utils/notifications/unifiedNotificationService';
+import { useNotificationStore } from '../../../store/useNotificationStore';
 
 export const UnifiedNotificationCenter: React.FC<UnifiedNotificationCenterProps> = ({ 
   products = [], 
@@ -39,8 +40,8 @@ export const UnifiedNotificationCenter: React.FC<UnifiedNotificationCenterProps>
 }) => {
   const [activeSection, setActiveSection] = useState<WorkflowSection>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { stats, fetchStats } = useNotificationStore();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<NotificationStats | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   
   // Enterprise feature panels
@@ -60,11 +61,8 @@ export const UnifiedNotificationCenter: React.FC<UnifiedNotificationCenterProps>
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [statsData, analyticsData] = await Promise.all([
-        unifiedNotificationService.getStats(),
-        unifiedNotificationService.getAnalytics()
-      ]);
-      setStats(statsData);
+      await fetchStats();
+      const analyticsData = await unifiedNotificationService.getAnalytics();
       setAnalytics(analyticsData);
     } catch (error) {
       console.error('Error loading dashboard data:', error);

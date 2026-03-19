@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '../../config/supabase';
+import logger from '../logger';
 import { toast } from 'sonner';
 
 export interface OrderItem {
@@ -111,7 +112,7 @@ export const createOrder = async (order: Order): Promise<Order | null> => {
       time: new Date(data.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
     };
 
-    console.log('✅ Order saved to Supabase:', savedOrder.id);
+    logger.log('✅ Order saved to Supabase:', savedOrder.id);
     return savedOrder;
   } catch (error: any) {
     console.error('Error creating order:', error);
@@ -151,12 +152,12 @@ export const updateOrder = async (orderId: string, updates: Partial<Order>): Pro
     if (updates.instructions !== undefined) updateData.notes = updates.instructions;
     if (updates.paymentMethod) updateData.payment_method = updates.paymentMethod;
 
-    console.log('🔄 Updating order in database:', orderId, 'Data:', updateData);
+    logger.log('🔄 Updating order in database:', orderId, 'Data:', updateData);
     
     // Check if user is authenticated
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      console.warn('⚠️ User not authenticated, order update may fail due to RLS');
+      logger.warn('⚠️ User not authenticated, order update may fail due to RLS');
     }
     
     const { data, error } = await supabase
@@ -188,8 +189,8 @@ export const updateOrder = async (orderId: string, updates: Partial<Order>): Pro
       return null;
     }
     
-    console.log('✅ Order update successful, received data:', data);
-    console.log('✅ Updated status:', data.status);
+    logger.log('✅ Order update successful, received data:', data);
+    logger.log('✅ Updated status:', data.status);
 
     // Map database response back to Order format
     const customerDetails = data.customer_details || {};
@@ -219,7 +220,7 @@ export const updateOrder = async (orderId: string, updates: Partial<Order>): Pro
       time: new Date(data.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
     };
 
-    console.log('✅ Order updated in Supabase:', orderId);
+    logger.log('✅ Order updated in Supabase:', orderId);
     return updatedOrder;
   } catch (error: any) {
     console.error('Error updating order:', error);
@@ -302,7 +303,7 @@ export const deleteOrder = async (orderId: string): Promise<boolean> => {
       return false;
     }
 
-    console.log('✅ Order deleted from Supabase:', orderId);
+    logger.log('✅ Order deleted from Supabase:', orderId);
     return true;
   } catch (error: any) {
     console.error('Error deleting order:', error);

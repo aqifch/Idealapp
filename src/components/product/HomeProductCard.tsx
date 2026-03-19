@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Product } from "../../data/mockData";
-import { ImageWithFallback } from "../common/figma/ImageWithFallback";
+import { SkeletonImage } from "../common/SkeletonImage";
 import { motion, AnimatePresence } from "motion/react";
 import { ShoppingCart, Plus, Minus, Heart } from "lucide-react";
 import { useAddToCart } from "../../hooks/useAddToCart";
@@ -126,7 +126,7 @@ export const HomeProductCard: React.FC<HomeProductCardProps> = ({ product, onCli
           }}
           transition={{ duration: 0.3 }}
         >
-          <ImageWithFallback
+          <SkeletonImage
             src={product.image}
             alt={product.name}
             className="w-full h-full object-cover"

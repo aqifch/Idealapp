@@ -86,11 +86,15 @@ export const Header = ({ onSearch, onProductClick, onViewAllResults, allProducts
     const query = e.target.value;
     setSearchQuery(query);
 
-    if (query.trim().length > 0) {
-      const filtered = allProducts.filter((product) =>
-        product.name.toLowerCase().includes(query.toLowerCase()) ||
-        product.category.toLowerCase().includes(query.toLowerCase())
-      );
+    const trimmed = query.trim();
+    if (trimmed.length > 0) {
+      const normalizedQuery = trimmed.toLowerCase();
+      const filtered = allProducts.filter((product) => {
+        const nameMatch = product.name.toLowerCase().includes(normalizedQuery);
+        const category = product.category ?? '';
+        const categoryMatch = category.toLowerCase().includes(normalizedQuery);
+        return nameMatch || categoryMatch;
+      });
       setSearchResults(filtered.slice(0, 5)); // Show max 5 results
     } else {
       setSearchResults([]);
@@ -461,6 +465,7 @@ export const Header = ({ onSearch, onProductClick, onViewAllResults, allProducts
       <AnimatePresence>
         {isNotificationOpen && (
           <NotificationPanel
+            isOpen={isNotificationOpen}
             notifications={notifications}
             onMarkAllAsRead={handleMarkAllAsRead}
             onClose={() => setIsNotificationOpen(false)}

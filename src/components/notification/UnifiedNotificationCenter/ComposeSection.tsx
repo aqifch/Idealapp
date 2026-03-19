@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../../utils/logger';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Send, 
@@ -105,10 +106,13 @@ export const ComposeSection: React.FC<ComposeSectionProps> = ({ products = [], d
         ? getFunctionUrl('make-server-b09ae082/notifications/broadcast')
         : getFunctionUrl('make-server-b09ae082/notifications');
 
+      const { getAuthToken } = await import('../../config/supabase');
+      const token = await getAuthToken();
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${getPublicAnonKey()}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(notificationData),
@@ -128,7 +132,7 @@ export const ComposeSection: React.FC<ComposeSectionProps> = ({ products = [], d
 
       throw new Error('Server unavailable');
     } catch (error) {
-      console.log('ℹ️ Error creating notification, falling back to local');
+      logger.log('ℹ️ Error creating notification, falling back to local');
       localNotifications.create({
         ...notificationData,
         createdBy: 'admin',
@@ -233,7 +237,7 @@ export const ComposeSection: React.FC<ComposeSectionProps> = ({ products = [], d
         throw new Error('Failed to update notification');
       }
     } catch (error) {
-      console.log('ℹ️ Error updating notification, falling back to local');
+      logger.log('ℹ️ Error updating notification, falling back to local');
       localNotifications.update(selectedNotification.id, {
         ...notificationData,
         isBroadcast: formData.targetUserId === 'all',
@@ -276,7 +280,7 @@ export const ComposeSection: React.FC<ComposeSectionProps> = ({ products = [], d
       await loadData();
       onRefresh();
     } catch (error) {
-      console.log('ℹ️ Error deleting notification, falling back to local');
+      logger.log('ℹ️ Error deleting notification, falling back to local');
       localNotifications.delete(id);
       toast.success('🗑️ Notification deleted (local mode)');
       setUseLocalFallback(true);

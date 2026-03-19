@@ -6,19 +6,72 @@
 import { supabase } from '../../config/supabase';
 import { getFunctionUrl, getPublicAnonKey } from '../../config/supabase';
 import { localNotifications } from './localNotifications';
-import { Notification, NotificationStats, AnalyticsData } from '../../components/notification/UnifiedNotificationCenter/types';
+import { Notification, NotificationStats, AnalyticsData, NotificationType } from '../../components/notification/UnifiedNotificationCenter/types';
+
+const getNotifUrl = (path: string = 'notifications') => {
+  return import.meta.env.VITE_SUPABASE_NOTIF_URL 
+    ? `${import.meta.env.VITE_SUPABASE_NOTIF_URL}/${path.replace('notifications/', '')}`
+    : getFunctionUrl(path);
+};
+
+// Queue for offline bulk operations
+const OFFLINE_QUEUE_KEY = 'ideal_notif_offline_queue';
 
 class UnifiedNotificationService {
+  constructor() {
+    this.setupOfflineSync();
+  }
+
+  private setupOfflineSync() {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', this.processOfflineQueue.bind(this));
+    }
+  }
+
+  private async processOfflineQueue() {
+    try {
+      const queueStr = localStorage.getItem(OFFLINE_QUEUE_KEY);
+      if (!queueStr) return;
+      
+      const queue: { ids: string[], operation: string }[] = JSON.parse(queueStr);
+      if (queue.length === 0) return;
+      
+      console.log('Processing offline notification queue...', queue.length, 'operations');
+      
+      const failedQueue: { ids: string[], operation: string }[] = [];
+      
+      for (const item of queue) {
+        try {
+          const success = await this.bulkOperation(item.ids, item.operation as any, true);
+          if (!success) {
+            failedQueue.push(item);
+          }
+        } catch (e) {
+          failedQueue.push(item);
+        }
+      }
+      
+      if (failedQueue.length > 0) {
+        localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(failedQueue));
+      } else {
+        localStorage.removeItem(OFFLINE_QUEUE_KEY);
+      }
+    } catch (e) {
+      console.error('Failed to process offline queue', e);
+    }
+  }
   /**
    * Get all notifications (all types)
    */
   async getAllNotifications(): Promise<Notification[]> {
     try {
+      const { getAuthToken } = await import('../../config/supabase');
+      const token = await getAuthToken();
       const response = await fetch(
-        getFunctionUrl('make-server-b09ae082/notifications'),
+        getNotifUrl('notifications'),
         {
           headers: {
-            'Authorization': `Bearer ${getPublicAnonKey()}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -46,11 +99,13 @@ class UnifiedNotificationService {
    */
   async getStats(): Promise<NotificationStats> {
     try {
+      const { getAuthToken } = await import('../../config/supabase');
+      const token = await getAuthToken();
       const response = await fetch(
-        getFunctionUrl('make-server-b09ae082/notifications/stats'),
+        getNotifUrl('notifications/stats'),
         {
           headers: {
-            'Authorization': `Bearer ${getPublicAnonKey()}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -98,11 +153,18 @@ class UnifiedNotificationService {
    */
   async bulkOperation(
     notificationIds: string[],
-    operation: 'delete' | 'mark_read' | 'mark_unread' | 'archive'
+    operation: 'delete' | 'mark_read' | 'mark_unread' | 'archive',
+    isProcessingQueue: boolean = false
   ): Promise<boolean> {
     try {
+      // If offline, add to queue
+      if (!navigator.onLine && !isProcessingQueue) {
+        this.addToOfflineQueue(notificationIds, operation);
+        return true; // Optimistic return
+      }
+
       const response = await fetch(
-        getFunctionUrl('make-server-b09ae082/notifications/bulk'),
+        getNotifUrl('notifications/bulk'),
         {
           method: 'POST',
           headers: {
@@ -113,10 +175,28 @@ class UnifiedNotificationService {
         }
       );
 
+      if (!response.ok && !isProcessingQueue) {
+        this.addToOfflineQueue(notificationIds, operation);
+      }
       return response.ok;
     } catch (error) {
       console.error('Error performing bulk operation:', error);
-      return false;
+      if (!isProcessingQueue) {
+        this.addToOfflineQueue(notificationIds, operation);
+      }
+      return false; // Retried later
+    }
+  }
+
+  private addToOfflineQueue(ids: string[], operation: string) {
+    try {
+      const queueStr = localStorage.getItem(OFFLINE_QUEUE_KEY);
+      const queue = queueStr ? JSON.parse(queueStr) : [];
+      queue.push({ ids, operation });
+      localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+      console.log('Added notification operation to offline queue');
+    } catch (e) {
+      console.error('Failed to add to offline queue', e);
     }
   }
 
@@ -129,7 +209,7 @@ class UnifiedNotificationService {
   ): Promise<string | null> {
     try {
       const response = await fetch(
-        getFunctionUrl('make-server-b09ae082/notifications/ab-test'),
+        getNotifUrl('notifications/ab-test'),
         {
           method: 'POST',
           headers: {
@@ -161,7 +241,7 @@ class UnifiedNotificationService {
   ): Promise<boolean> {
     try {
       const response = await fetch(
-        getFunctionUrl('make-server-b09ae082/notifications'),
+        getNotifUrl('notifications'),
         {
           method: 'POST',
           headers: {
@@ -351,7 +431,7 @@ class UnifiedNotificationService {
       openRate: 0,
       clickRate: 0,
       engagementRate: 0,
-      byType: {},
+      byType: {} as Record<NotificationType, any>,
       byDate: [],
       trends: {
         openRateTrend: 0,

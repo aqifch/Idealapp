@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import logger from '../utils/logger';
 import { getProjectId, getPublicAnonKey, getFunctionUrl } from '../config/supabase';
 import { supabase } from '../config/supabase';
 import { toast } from 'sonner';
@@ -104,23 +105,26 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         ? getFunctionUrl(`make-server-b09ae082/notifications/${userId}`)
         : getFunctionUrl('make-server-b09ae082/notifications');
       
-      console.log(`📡 Fetching notifications from: ${endpoint}`);
-      console.log(`📡 User ID: ${userId}`);
-      console.log(`📡 Using projectId: ${projectId}`);
+      logger.log(`📡 Fetching notifications from: ${endpoint}`);
+      logger.log(`📡 User ID: ${userId}`);
+      logger.log(`📡 Using projectId: ${projectId}`);
       
+      const { getAuthToken } = await import('../config/supabase');
+      const token = await getAuthToken();
+
       const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${getPublicAnonKey()}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
 
-      console.log(`📡 Response status: ${response.status}`);
+      logger.log(`📡 Response status: ${response.status}`);
 
       if (response.ok) {
         const data = await response.json();
-        console.log(`📡 Response data:`, data);
+        logger.log(`📡 Response data:`, data);
         
         if (data.success) {
           const serverNotifs = data.notifications || [];
@@ -135,7 +139,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
                 .order('created_at', { ascending: false });
               
               if (!dbError && dbData && dbData.length > 0) {
-                console.log(`✅ Fetched ${dbData.length} notifications directly from database`);
+                logger.log(`✅ Fetched ${dbData.length} notifications directly from database`);
                 const mappedDbNotifs = dbData.map((n: any) => ({
                   id: `notification:${n.id}`,
                   type: n.type,
@@ -160,7 +164,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
                 
                 setNotifications(merged);
                 setUseLocalFallback(false);
-                console.log(`✅ Fetched ${mappedDbNotifs.length} database + ${localOnly.length} local notifications`);
+                logger.log(`✅ Fetched ${mappedDbNotifs.length} database + ${localOnly.length} local notifications`);
                 setLoading(false);
                 return;
               }
@@ -169,7 +173,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
               const errorCode = dbFetchError?.code;
               const errorMsg = dbFetchError?.message || '';
               if (errorCode !== '42501' && errorCode !== 'PGRST116' && !errorMsg.includes('does not exist')) {
-                console.warn('⚠️ Direct database fetch failed:', dbFetchError);
+                logger.warn('⚠️ Direct database fetch failed:', dbFetchError);
               }
             }
           }
@@ -201,11 +205,11 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
           setNotifications(merged);
           setUseLocalFallback(false);
-          console.log(`✅ Fetched ${mappedNotifs.length} server + ${localOnly.length} local notifications`);
+          logger.log(`✅ Fetched ${mappedNotifs.length} server + ${localOnly.length} local notifications`);
           setLoading(false);
           return;
         } else {
-          console.warn('⚠️ Server returned success:false:', data);
+          logger.warn('⚠️ Server returned success:false:', data);
         }
       } else {
         const errorText = await response.text().catch(() => 'Unknown error');
@@ -222,7 +226,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
             .order('created_at', { ascending: false });
           
           if (!dbError && dbData && dbData.length > 0) {
-            console.log(`✅ Fetched ${dbData.length} notifications directly from database`);
+            logger.log(`✅ Fetched ${dbData.length} notifications directly from database`);
             const mappedDbNotifs = dbData.map((n: any) => ({
               id: `notification:${n.id}`,
               type: n.type,
@@ -247,7 +251,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
             
             setNotifications(merged);
             setUseLocalFallback(false);
-            console.log(`✅ Fetched ${mappedDbNotifs.length} database + ${localOnly.length} local notifications`);
+            logger.log(`✅ Fetched ${mappedDbNotifs.length} database + ${localOnly.length} local notifications`);
             setLoading(false);
             return;
           }
@@ -256,7 +260,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
           const errorCode = dbFetchError?.code;
           const errorMsg = dbFetchError?.message || '';
           if (errorCode !== '42501' && errorCode !== 'PGRST116' && !errorMsg.includes('does not exist')) {
-            console.warn('⚠️ Direct database fetch failed:', dbFetchError);
+            logger.warn('⚠️ Direct database fetch failed:', dbFetchError);
           }
         }
       }
@@ -278,7 +282,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       
       // Only log if it's an unexpected error
       if (!isNonCriticalError && !useLocalFallback) {
-        console.log('ℹ️ Server unavailable, switching to local storage mode');
+        logger.log('ℹ️ Server unavailable, switching to local storage mode');
       }
       
       setUseLocalFallback(true);
@@ -292,15 +296,15 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         localNotifications.seedDemo();
         const seededNotifs = localNotifications.getByUser(userId);
         setNotifications(seededNotifs);
-        console.log(`✅ Loaded ${seededNotifs.length} demo notifications from local storage`);
+        logger.log(`✅ Loaded ${seededNotifs.length} demo notifications from local storage`);
       } else {
         setNotifications(localNotifs);
-        console.log(`✅ Loaded ${localNotifs.length} notifications from local storage`);
+        logger.log(`✅ Loaded ${localNotifs.length} notifications from local storage`);
       }
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, useLocalFallback]);
 
   // Auto-fetch notifications on mount and userId change
   useEffect(() => {
@@ -335,7 +339,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     try {
       // Extract database ID (remove "notification:" prefix if present)
       const dbId = notificationId.replace("notification:", "");
-      console.log(`📝 Marking notification as read: ${notificationId} (DB ID: ${dbId})`);
+      logger.log(`📝 Marking notification as read: ${notificationId} (DB ID: ${dbId})`);
       
       // Try direct database update first (more reliable)
       const { data: updatedData, error: dbError } = await supabase
@@ -346,7 +350,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         .single();
       
       if (!dbError && updatedData) {
-        console.log(`✅ Notification marked as read in database: ${dbId}`);
+        logger.log(`✅ Notification marked as read in database: ${dbId}`);
         // Also update local storage
         localNotifications.markAsRead(notificationId);
         // Update local state
@@ -360,7 +364,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       
       // Suppress RLS errors for guest users
       if (dbError?.code !== '42501' && dbError?.message && !dbError.message.includes('row-level security')) {
-        console.warn('⚠️ Direct DB update failed, trying Edge Function...');
+        logger.warn('⚠️ Direct DB update failed, trying Edge Function...');
       }
       
       // If direct DB fails, try Edge Function
@@ -369,7 +373,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         {
           method: 'PATCH',
           headers: {
-            'Authorization': `Bearer ${getPublicAnonKey()}`,
+            'Authorization': `Bearer ${await getAuthToken()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -377,7 +381,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
       if (response.ok) {
         const data = await response.json();
-        console.log(`✅ Notification marked as read via Edge Function:`, data);
+        logger.log(`✅ Notification marked as read via Edge Function:`, data);
         // Also update local storage
         localNotifications.markAsRead(notificationId);
         // Update local state
@@ -392,7 +396,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       const errorText = await response.text().catch(() => 'Unknown error');
       // Only log unexpected errors
       if (response.status !== 404 && response.status !== 403) {
-        console.warn('⚠️ Edge Function update failed:', response.status);
+        logger.warn('⚠️ Edge Function update failed:', response.status);
       }
       throw new Error(`Failed to mark notification as read: ${errorText}`);
     } catch (error: any) {
@@ -418,7 +422,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     if (!userId) return;
 
     try {
-      console.log(`📝 Marking all notifications as read for user: ${userId}`);
+      logger.log(`📝 Marking all notifications as read for user: ${userId}`);
       
       // Try direct database update first (more reliable)
       const { data: updatedData, error: dbError } = await supabase
@@ -429,7 +433,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       
       if (!dbError) {
         const updatedCount = updatedData?.length || 0;
-        console.log(`✅ Marked ${updatedCount} notifications as read in database`);
+        logger.log(`✅ Marked ${updatedCount} notifications as read in database`);
         // Also update local storage
         localNotifications.markAllAsRead(userId);
         // Update local state
@@ -442,7 +446,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       
       // Suppress RLS errors for guest users
       if (dbError?.code !== '42501' && dbError?.message && !dbError.message.includes('row-level security')) {
-        console.warn('⚠️ Direct DB update failed, trying Edge Function...');
+        logger.warn('⚠️ Direct DB update failed, trying Edge Function...');
       }
       
       // If direct DB fails, try Edge Function
@@ -451,14 +455,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         {
           method: 'PATCH',
           headers: {
-            'Authorization': `Bearer ${getPublicAnonKey()}`,
+            'Authorization': `Bearer ${await getAuthToken()}`,
             'Content-Type': 'application/json',
           },
         }
       );
 
       if (response.ok) {
-        console.log(`✅ All notifications marked as read via Edge Function`);
+        logger.log(`✅ All notifications marked as read via Edge Function`);
         // Also update local storage
         localNotifications.markAllAsRead(userId);
         // Update local state
@@ -472,7 +476,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       const errorText = await response.text().catch(() => 'Unknown error');
       // Only log unexpected errors
       if (response.status !== 404 && response.status !== 403) {
-        console.warn('⚠️ Edge Function update failed:', response.status);
+        logger.warn('⚠️ Edge Function update failed:', response.status);
       }
       throw new Error(`Failed to mark all notifications as read: ${errorText}`);
     } catch (error: any) {
@@ -497,7 +501,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
     try {
       // Try direct database deletion first (more reliable)
-      console.log(`🗑️ Clearing all notifications for user: ${userId}`);
+      logger.log(`🗑️ Clearing all notifications for user: ${userId}`);
       
       const { data: deletedData, error: dbError } = await supabase
         .from('notifications')
@@ -507,7 +511,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       
       if (!dbError) {
         const deletedCount = deletedData?.length || 0;
-        console.log(`✅ Cleared ${deletedCount} notifications from database for user: ${userId}`);
+        logger.log(`✅ Cleared ${deletedCount} notifications from database for user: ${userId}`);
         // Also clear local storage
         localNotifications.clearAll(userId);
         setNotifications([]);
@@ -517,7 +521,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       
       // Suppress RLS errors for guest users
       if (dbError?.code !== '42501' && dbError?.message && !dbError.message.includes('row-level security')) {
-        console.warn('⚠️ Direct DB delete failed, trying Edge Function...');
+        logger.warn('⚠️ Direct DB delete failed, trying Edge Function...');
       }
       
       // If direct DB fails, try Edge Function
@@ -526,7 +530,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${getPublicAnonKey()}`,
+            'Authorization': `Bearer ${await getAuthToken()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -535,7 +539,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       if (response.ok) {
         const result = await response.json();
         const count = result.count || 0;
-        console.log(`✅ Cleared ${count} notifications via Edge Function`);
+        logger.log(`✅ Cleared ${count} notifications via Edge Function`);
         // Also clear local storage
         localNotifications.clearAll(userId);
         setNotifications([]);
@@ -546,7 +550,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       const errorText = await response.text().catch(() => 'Unknown error');
       // Only log unexpected errors
       if (response.status !== 404 && response.status !== 403) {
-        console.warn('⚠️ Edge Function delete failed:', response.status);
+        logger.warn('⚠️ Edge Function delete failed:', response.status);
       }
       throw new Error(`Failed to clear notifications: ${errorText}`);
     } catch (error: any) {
@@ -568,7 +572,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     try {
       // Extract database ID (remove "notification:" prefix if present)
       const dbId = notificationId.replace("notification:", "");
-      console.log(`🗑️ Deleting notification: ${notificationId} (DB ID: ${dbId})`);
+      logger.log(`🗑️ Deleting notification: ${notificationId} (DB ID: ${dbId})`);
       
       // Try direct database deletion first (more reliable)
       const { data: deletedData, error: dbError } = await supabase
@@ -578,7 +582,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         .select();
       
       if (!dbError) {
-        console.log(`✅ Deleted notification from database: ${dbId}`);
+        logger.log(`✅ Deleted notification from database: ${dbId}`);
         // Also delete from local storage
         localNotifications.delete(notificationId);
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
@@ -587,7 +591,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       
       // Suppress RLS errors for guest users
       if (dbError?.code !== '42501' && dbError?.message && !dbError.message.includes('row-level security')) {
-        console.warn('⚠️ Direct DB delete failed, trying Edge Function...');
+        logger.warn('⚠️ Direct DB delete failed, trying Edge Function...');
       }
       
       // If direct DB fails, try Edge Function
@@ -596,14 +600,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${getPublicAnonKey()}`,
+            'Authorization': `Bearer ${await getAuthToken()}`,
             'Content-Type': 'application/json',
           },
         }
       );
 
       if (response.ok) {
-        console.log(`✅ Deleted notification via Edge Function: ${notificationId}`);
+        logger.log(`✅ Deleted notification via Edge Function: ${notificationId}`);
         // Also delete from local storage
         localNotifications.delete(notificationId);
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
@@ -613,7 +617,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       const errorText = await response.text().catch(() => 'Unknown error');
       // Only log unexpected errors
       if (response.status !== 404 && response.status !== 403) {
-        console.warn('⚠️ Edge Function delete failed:', response.status);
+        logger.warn('⚠️ Edge Function delete failed:', response.status);
       }
       throw new Error(`Failed to delete notification: ${errorText}`);
     } catch (error: any) {

@@ -1,3 +1,4 @@
+import logger from '../logger';
 // Local storage fallback for notifications when server is unavailable
 
 export interface LocalNotification {
@@ -157,7 +158,7 @@ export const localNotifications = {
     ];
 
     demoNotifications.forEach(notif => localNotifications.create(notif));
-    console.log('✅ Demo notifications seeded');
+    logger.log('✅ Demo notifications seeded');
   },
 
   // Sync server notifications to local storage

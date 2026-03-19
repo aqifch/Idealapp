@@ -87,3 +87,6 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.notification_templates TO authent
 
 
 
+
+
+

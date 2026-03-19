@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { motion, AnimatePresence } from 'motion/react';
 import { Zap, Plus, Edit2, Trash, X, Save, ToggleLeft, ToggleRight, Eye } from 'lucide-react';
 import { toast } from 'sonner';
@@ -114,7 +115,7 @@ export const NotificationAutomationAdmin = () => {
       const { data: { user } } = await supabase.auth.getUser();
       const testUserId = user?.id || 'all';
       
-      console.log('🧪 Testing automation:', automation.name, 'Trigger:', automation.trigger_type, 'User:', testUserId);
+      logger.log('🧪 Testing automation:', automation.name, 'Trigger:', automation.trigger_type, 'User:', testUserId);
       
       await triggerAutomation(automation.trigger_type, {
         orderNumber: 'TEST-123',
@@ -132,7 +133,7 @@ export const NotificationAutomationAdmin = () => {
       }, 1000);
       
       toast.success('Test notification sent! Check your notifications.');
-      console.log('✅ Test notification sent successfully');
+      logger.log('✅ Test notification sent successfully');
     } catch (error: any) {
       console.error('❌ Error testing automation:', error);
       toast.error(`Test failed: ${error.message || 'Unknown error'}`);

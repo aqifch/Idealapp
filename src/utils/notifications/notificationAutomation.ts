@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '../../config/supabase';
+import logger from '../logger';
 import { toast } from 'sonner';
 import { getDefaultTemplate, renderNotificationFromTemplate } from './notificationTemplates';
 import { errorLogger } from '../api/errorLogger';
@@ -12,20 +13,20 @@ export interface NotificationAutomation {
   id: string;
   name: string;
   description?: string | null;
-  trigger_type: 
-    | 'order_placed'
-    | 'order_status_changed'
-    | 'order_confirmed'
-    | 'order_preparing'
-    | 'order_ready'
-    | 'order_completed'
-    | 'order_cancelled'
-    | 'product_added'
-    | 'deal_started'
-    | 'deal_ended'
-    | 'scheduled'
-    | 'product_low_stock'
-    | 'user_registered';
+  trigger_type:
+  | 'order_placed'
+  | 'order_status_changed'
+  | 'order_confirmed'
+  | 'order_preparing'
+  | 'order_ready'
+  | 'order_completed'
+  | 'order_cancelled'
+  | 'product_added'
+  | 'deal_started'
+  | 'deal_ended'
+  | 'scheduled'
+  | 'product_low_stock'
+  | 'user_registered';
   conditions: Record<string, any>;
   template_id?: string | null;
   notification_data: Record<string, any>;
@@ -102,7 +103,7 @@ export const evaluateConditions = (
 ): boolean => {
   // Simple condition evaluation
   // Can be extended for complex logic
-  
+
   if (!conditions || Object.keys(conditions).length === 0) {
     return true; // No conditions = always trigger
   }
@@ -127,7 +128,7 @@ export const createNotificationFromAutomation = async (
   try {
     // Evaluate conditions
     if (!evaluateConditions(automation.conditions, context)) {
-      console.log('Automation conditions not met');
+      logger.log('Automation conditions not met');
       return false;
     }
 
@@ -142,7 +143,7 @@ export const createNotificationFromAutomation = async (
         automation.template_id,
         context
       );
-      
+
       if (rendered) {
         title = rendered.title;
         message = rendered.message;
@@ -159,7 +160,7 @@ export const createNotificationFromAutomation = async (
       message = automation.notification_data.message || '';
       image_url = automation.notification_data.image_url || null;
       action_url = automation.notification_data.action_url || null;
-      
+
       // Render placeholders in notification_data if present
       if (title && (title.includes('{{') || title.includes('{{'))) {
         const { renderTemplate } = await import('./notificationTemplates');
@@ -175,7 +176,7 @@ export const createNotificationFromAutomation = async (
           message = renderedMessage;
         }
       }
-      
+
       // If notification_data is empty, use default messages based on trigger
       if (!title || title === 'Notification' || !message) {
         const defaultMessages: Record<string, { title: string; message: string }> = {
@@ -208,7 +209,7 @@ export const createNotificationFromAutomation = async (
             message: `Your order has been cancelled.`
           }
         };
-        
+
         const defaultMsg = defaultMessages[automation.trigger_type];
         if (defaultMsg) {
           title = defaultMsg.title;
@@ -234,14 +235,14 @@ export const createNotificationFromAutomation = async (
     };
 
     const notificationType = typeMap[automation.trigger_type] || 'system';
-    
+
     // Ensure placeholders are rendered before creating notification
     if (title && (title.includes('{{') || title.includes('{{'))) {
       const { renderTemplate } = await import('./notificationTemplates');
       const renderedTitle = renderTemplate(title, context);
       if (renderedTitle && renderedTitle !== title) {
         title = renderedTitle;
-        console.log('✅ Rendered title:', title);
+        logger.log('✅ Rendered title:', title);
       }
     }
     if (message && (message.includes('{{') || message.includes('{{'))) {
@@ -249,12 +250,12 @@ export const createNotificationFromAutomation = async (
       const renderedMessage = renderTemplate(message, context);
       if (renderedMessage && renderedMessage !== message) {
         message = renderedMessage;
-        console.log('✅ Rendered message:', message);
+        logger.log('✅ Rendered message:', message);
       }
     }
-    
+
     // Log for debugging
-    console.log('🔔 Creating notification:', {
+    logger.log('🔔 Creating notification:', {
       automation: automation.name,
       trigger: automation.trigger_type,
       type: notificationType,
@@ -299,17 +300,13 @@ export const createNotificationFromAutomation = async (
     }
 
     // Create notification directly in Supabase database (bypass Edge Function to avoid KV store errors)
-    console.log('📤 Creating notification directly in Supabase database:', {
+    logger.log('📤 Creating notification directly in Supabase database:', {
       type: notificationType,
       title,
       message,
       automation: automation.name
     });
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/009b7b75-40e5-4b56-b353-77deb65e4317',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'notificationAutomation.ts:createNotificationFromAutomation:directDB',message:'Creating notification directly in database',data:{automation:automation.name,trigger:automation.trigger_type,type:notificationType},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-    
+
     // Prepare notification data for Supabase
     const dbNotificationData: any = {
       type: notificationType,
@@ -322,7 +319,7 @@ export const createNotificationFromAutomation = async (
       automation_id: automation.id,
       metadata: context,
     };
-    
+
     // Add target user if not broadcast
     if (automation.target_audience === 'user' && targetUserId) {
       dbNotificationData.target_user_id = targetUserId;
@@ -334,7 +331,7 @@ export const createNotificationFromAutomation = async (
       dbNotificationData.target_user_id = targetUserId;
       dbNotificationData.is_broadcast = false;
     }
-    
+
     // Add product/deal IDs if in context
     if (context.productId) {
       dbNotificationData.product_id = context.productId;
@@ -342,7 +339,7 @@ export const createNotificationFromAutomation = async (
     if (context.dealId) {
       dbNotificationData.deal_id = context.dealId;
     }
-    
+
     const { data, error } = await supabase
       .from('notifications')
       .insert(dbNotificationData)
@@ -353,14 +350,14 @@ export const createNotificationFromAutomation = async (
       console.error('❌ Supabase insert error:', error);
       throw error;
     }
-    
-    console.log('✅ Notification created in Supabase database:', data.id);
-    
+
+    logger.log('✅ Notification created in Supabase database:', data.id);
+
     // Trigger refresh event
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('refreshNotifications'));
     }, 500);
-    
+
     return true;
   } catch (error: any) {
     console.error('Error creating notification from automation (outer):', error);
@@ -378,15 +375,15 @@ export const triggerAutomation = async (
 ): Promise<void> => {
   try {
     const automations = await fetchAutomationsByTrigger(triggerType);
-    
+
     if (automations.length === 0) {
-      console.log(`⚠️ No active automations found for trigger: ${triggerType}`);
-      console.log(`💡 Creating notification directly without automation...`);
-      
+      logger.log(`⚠️ No active automations found for trigger: ${triggerType}`);
+      logger.log(`💡 Creating notification directly without automation...`);
+
       // Fallback: Create notification directly if no automation exists
       try {
         const { getFunctionUrl, getPublicAnonKey } = await import('../../config/supabase');
-        
+
         // Default notification messages based on trigger type
         const defaultMessages: Record<string, { title: string; message: string }> = {
           'order_placed': {
@@ -418,12 +415,12 @@ export const triggerAutomation = async (
             message: `Your order has been cancelled.`
           }
         };
-        
+
         const defaultMsg = defaultMessages[triggerType] || {
           title: 'Order Update',
           message: `Your order ${context.orderNumber || ''} has been updated.`
         };
-        
+
         // Get current user if targetUserId not provided
         let finalTargetUserId = targetUserId;
         if (!finalTargetUserId) {
@@ -435,18 +432,18 @@ export const triggerAutomation = async (
             finalTargetUserId = 'all';
           }
         }
-        
-        console.log('📤 Creating notification directly in database (no automation):', {
+
+        logger.log('📤 Creating notification directly in database (no automation):', {
           type: triggerType.includes('order') ? 'order' : 'system',
           title: defaultMsg.title,
           message: defaultMsg.message,
           targetUserId: finalTargetUserId
         });
-        
+
         // Create notification directly in Supabase database (bypass Edge Function)
         try {
           const { supabase } = await import('../../config/supabase');
-          
+
           const dbNotificationData: any = {
             type: triggerType.includes('order') ? 'order' : 'system',
             title: defaultMsg.title,
@@ -455,25 +452,25 @@ export const triggerAutomation = async (
             metadata: context,
             is_read: false,
           };
-          
+
           if (finalTargetUserId && finalTargetUserId !== 'all') {
             dbNotificationData.target_user_id = finalTargetUserId;
             dbNotificationData.is_broadcast = false;
           }
-          
+
           const { data, error } = await supabase
             .from('notifications')
             .insert(dbNotificationData)
             .select()
             .single();
-          
+
           if (error) {
             console.error('❌ Database insert error:', error);
             throw error;
           }
-          
-          console.log('✅ Notification created in Supabase database:', data.id);
-          
+
+          logger.log('✅ Notification created in Supabase database:', data.id);
+
           // Trigger refresh event
           setTimeout(() => {
             window.dispatchEvent(new CustomEvent('refreshNotifications'));
@@ -591,7 +588,7 @@ export const createCampaign = async (
 ): Promise<NotificationCampaign | null> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     const { data, error } = await supabase
       .from('notification_campaigns')
       .insert({
@@ -617,7 +614,7 @@ export const createCampaign = async (
 export const processScheduledCampaigns = async (): Promise<void> => {
   try {
     const now = new Date().toISOString();
-    
+
     const { data: campaigns, error } = await supabase
       .from('notification_campaigns')
       .select('*')
@@ -629,7 +626,7 @@ export const processScheduledCampaigns = async (): Promise<void> => {
     for (const campaign of campaigns || []) {
       // Send campaign notifications
       await sendCampaignNotifications(campaign);
-      
+
       // Update campaign status
       await supabase
         .from('notification_campaigns')
@@ -647,7 +644,7 @@ export const processScheduledCampaigns = async (): Promise<void> => {
 export const sendCampaignNotifications = async (campaign: NotificationCampaign): Promise<void> => {
   try {
     const notificationData = campaign.notification_data;
-    
+
     // Create broadcast notification
     const { error } = await supabase
       .from('notifications')
@@ -665,7 +662,7 @@ export const sendCampaignNotifications = async (campaign: NotificationCampaign):
 
     if (error) throw error;
 
-    console.log(`✅ Campaign notification sent: ${campaign.name}`);
+    logger.log(`✅ Campaign notification sent: ${campaign.name}`);
 
     // Update sent count
     await supabase

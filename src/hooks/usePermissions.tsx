@@ -1,9 +1,12 @@
 import { useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
+import { isAdminRole } from '../utils/helpers';
 
 export type UserRole = 'admin' | 'manager' | 'staff' | 'support' | 'customer';
 
 export const usePermissions = (user: User | null) => {
+  // Role is set via Supabase Dashboard → Authentication → Users → user_metadata: {"role": "admin"}
+  // DO NOT hardcode admin emails here — set role in Supabase user_metadata instead
   const role = (user?.user_metadata?.role || 'customer') as UserRole;
 
   const permissions = useMemo(() => {
@@ -31,14 +34,14 @@ export const usePermissions = (user: User | null) => {
           canManageBanners: true,
           canManageUsers: true,
           canManageRoles: false,
-          canManageSettings: true, // Store settings like open/close
+          canManageSettings: true,
           canViewNotifications: true,
         };
-      case 'staff': // Kitchen Staff
+      case 'staff':
         return {
           canViewDashboard: true,
-          canManageProducts: false, // View only maybe?
-          canManageOrders: true, // Update status
+          canManageProducts: false,
+          canManageOrders: true,
           canManageCategories: false,
           canManageDeals: false,
           canManageBanners: false,
@@ -51,11 +54,11 @@ export const usePermissions = (user: User | null) => {
         return {
           canViewDashboard: true,
           canManageProducts: false,
-          canManageOrders: true, // View/Help
+          canManageOrders: true,
           canManageCategories: false,
           canManageDeals: false,
           canManageBanners: false,
-          canManageUsers: true, // Look up users
+          canManageUsers: true,
           canManageRoles: false,
           canManageSettings: false,
           canViewNotifications: true,
@@ -76,5 +79,6 @@ export const usePermissions = (user: User | null) => {
     }
   }, [role]);
 
-  return { role, permissions };
+  return { role, permissions, isAdmin: isAdminRole(role) };
 };
+

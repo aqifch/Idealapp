@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bell, 
@@ -131,7 +132,7 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
       // Then seed sample data (it will check if data exists and only insert if empty)
       // Don't wait for seeding - it might fail due to RLS, but that's OK
       seedSampleData().catch(err => {
-        console.warn('⚠️ Seeding failed (this is OK if data already exists):', err);
+        logger.warn('⚠️ Seeding failed (this is OK if data already exists):', err);
       });
       // Reload data after a short delay to show new items if seeding succeeded
       setTimeout(() => {
@@ -248,7 +249,7 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
         if (automationError) {
           console.error('❌ Error adding automations:', automationError);
         } else {
-          console.log('✅ 3 Automations added successfully');
+          logger.log('✅ 3 Automations added successfully');
         }
       }
 
@@ -304,7 +305,7 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
         if (campaignError) {
           console.error('❌ Error adding campaigns:', campaignError);
         } else {
-          console.log('✅ 3 Campaigns added successfully');
+          logger.log('✅ 3 Campaigns added successfully');
         }
       }
 
@@ -343,7 +344,7 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
         ];
         const { error: templateError } = await supabase.from('notification_templates').insert(sampleTemplates);
         if (!templateError) {
-          console.log('✅ 3 Templates added successfully');
+          logger.log('✅ 3 Templates added successfully');
         } else {
           console.error('❌ Error adding templates:', templateError);
         }
@@ -357,7 +358,7 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
   // ========== NOTIFICATIONS ==========
   const loadNotifications = async () => {
     try {
-      console.log('🔄 Loading notifications from database...');
+      logger.log('🔄 Loading notifications from database...');
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
@@ -368,7 +369,7 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
         throw error;
       }
       
-      console.log('✅ Loaded notifications:', data?.length || 0);
+      logger.log('✅ Loaded notifications:', data?.length || 0);
       setNotifications(data || []);
     } catch (error: any) {
       console.error('❌ Error loading notifications:', error);
@@ -497,7 +498,7 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
   // ========== AUTOMATIONS ==========
   const loadAutomations = async () => {
     try {
-      console.log('🔄 Loading automations from database...');
+      logger.log('🔄 Loading automations from database...');
       const { data, error } = await supabase
         .from('notification_automations')
         .select('*')
@@ -510,9 +511,9 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
         throw error;
       }
       
-      console.log('✅ Loaded automations:', data?.length || 0);
+      logger.log('✅ Loaded automations:', data?.length || 0);
       if (data && data.length > 0) {
-        console.log('📋 Automation names:', data.map(a => a.name));
+        logger.log('📋 Automation names:', data.map(a => a.name));
       }
       setAutomations(data || []);
     } catch (error: any) {
@@ -654,7 +655,7 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
   // ========== CAMPAIGNS ==========
   const loadCampaigns = async () => {
     try {
-      console.log('🔄 Loading campaigns from database...');
+      logger.log('🔄 Loading campaigns from database...');
       const { data, error } = await supabase
         .from('notification_campaigns')
         .select('*')
@@ -681,12 +682,12 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
         throw error;
       }
       
-      console.log('✅ Loaded campaigns:', data?.length || 0);
+      logger.log('✅ Loaded campaigns:', data?.length || 0);
       if (data && data.length > 0) {
-        console.log('📋 Campaign names:', data.map(c => c.name));
-        console.log('📋 Full data:', data);
+        logger.log('📋 Campaign names:', data.map(c => c.name));
+        logger.log('📋 Full data:', data);
       } else {
-        console.warn('⚠️ No campaigns found. Table might be empty or RLS is blocking.');
+        logger.warn('⚠️ No campaigns found. Table might be empty or RLS is blocking.');
       }
       setCampaigns(data || []);
     } catch (error: any) {
@@ -764,7 +765,7 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
   // ========== TEMPLATES ==========
   const loadTemplates = async () => {
     try {
-      console.log('🔄 Loading templates from database...');
+      logger.log('🔄 Loading templates from database...');
       const { data, error } = await supabase
         .from('notification_templates')
         .select('*')
@@ -791,12 +792,12 @@ export const SimpleNotificationCenter: React.FC<SimpleNotificationCenterProps> =
         throw error;
       }
       
-      console.log('✅ Loaded templates:', data?.length || 0);
+      logger.log('✅ Loaded templates:', data?.length || 0);
       if (data && data.length > 0) {
-        console.log('📋 Template names:', data.map(t => t.name));
-        console.log('📋 Full data:', data);
+        logger.log('📋 Template names:', data.map(t => t.name));
+        logger.log('📋 Full data:', data);
       } else {
-        console.warn('⚠️ No templates found. Table might be empty or RLS is blocking.');
+        logger.warn('⚠️ No templates found. Table might be empty or RLS is blocking.');
       }
       setTemplates(data || []);
     } catch (error: any) {

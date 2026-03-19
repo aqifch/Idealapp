@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '../../config/supabase';
+import logger from '../logger';
 import { toast } from 'sonner';
 
 export interface NotificationTemplate {
@@ -47,7 +48,7 @@ export const renderTemplate = (
           const value = variables[key];
           rendered = rendered.replace(regex, value != null ? String(value) : '');
         } catch (err) {
-          console.warn(`Error replacing variable ${key}:`, err);
+          logger.warn(`Error replacing variable ${key}:`, err);
         }
       }
     });
